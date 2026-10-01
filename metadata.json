@@ -1,0 +1,6 @@
+{
+  "name": "Hotel Manchester - Luxury Resort & Sanctuaries",
+  "description": "Experience serene luxury, bespoke retreats, seamless room reservations with instant UPI QR payments, nationwide sanctuary branches, and personalized 24/7 concierge at Hotel Manchester.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
