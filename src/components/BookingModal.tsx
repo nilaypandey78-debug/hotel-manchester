@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
   Check,
@@ -166,8 +167,19 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-3xl my-6 bg-[#0f1115] border border-[#262932] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94, y: 16 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-full max-w-3xl my-6 bg-[#0f1115] border border-[#262932] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
+      >
         {/* Header */}
         <div className="px-6 sm:px-8 py-5 border-b border-[#1e2129] flex items-center justify-between bg-[#12141a]">
           <div>
@@ -714,7 +726,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };

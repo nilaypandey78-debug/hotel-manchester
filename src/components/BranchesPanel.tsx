@@ -1,5 +1,6 @@
 import React from 'react';
-import { MapPin, Phone, Mail, Sparkles, Compass, ChevronRight } from 'lucide-react';
+import { MapPin, Phone, Sparkles, ChevronRight } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useHotel } from '../context/HotelContext';
 import { Branch } from '../types';
 
@@ -11,12 +12,17 @@ export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRoom
   const { branches, selectedBranchId, setSelectedBranchId } = useHotel();
 
   return (
-    <section id="branches" className="py-24 bg-[#090a0c] border-t border-[#1c1e24]">
+    <section id="branches" className="py-24 bg-[#090a0c] border-t border-[#1c1e24] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        {/* Section Header with Reveal Animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
+        >
           <div className="max-w-2xl">
-            {/* Clean unboxed metadata kicker */}
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#c5a880] font-medium mb-3">
               <span>Nationwide Sanctuaries</span>
               <span aria-hidden="true">·</span>
@@ -29,19 +35,24 @@ export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRoom
           <p className="text-sm text-[#9b958b] max-w-md font-light leading-relaxed">
             Each Hotel Manchester sanctuary is an architectural devotion to its landscape—from royal lakeside Mewari courtyards to Himalayan cedar ridges.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Branch Cards Grid */}
+        {/* Branch Cards Grid with Staggered Entrance */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {branches.map((branch: Branch, idx: number) => {
             const isSelected = selectedBranchId === branch.id;
             return (
-              <div
+              <motion.div
                 key={branch.id}
-                className={`group relative rounded-2xl overflow-hidden bg-[#111317] border transition-all duration-500 flex flex-col justify-between ${
+                initial={{ opacity: 0, y: 35 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.65, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -6, transition: { duration: 0.25, ease: 'easeOut' } }}
+                className={`group relative rounded-2xl overflow-hidden bg-[#111317] border transition-all duration-300 flex flex-col justify-between ${
                   isSelected
-                    ? 'border-[#c5a880] shadow-[0_0_30px_rgba(197,168,128,0.15)] ring-1 ring-[#c5a880]'
-                    : 'border-[#22252c] hover:border-[#383d47]'
+                    ? 'border-[#c5a880] shadow-[0_10px_35px_rgba(197,168,128,0.18)] ring-1 ring-[#c5a880]'
+                    : 'border-[#22252c] hover:border-[#424855] hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
                 }`}
               >
                 {/* Branch Image with Hover Zoom */}
@@ -50,9 +61,9 @@ export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRoom
                     src={branch.image}
                     alt={branch.name}
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111317] via-[#111317]/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#111317] via-[#111317]/25 to-transparent" />
                   
                   {/* Location badge on top */}
                   <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0b0c0e]/80 backdrop-blur-md border border-[#2d3038] text-[11px] text-[#e0ded8]">
@@ -106,19 +117,21 @@ export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRoom
                       </span>
                     </div>
 
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => {
                         setSelectedBranchId(branch.id);
                         onSelectBranchRooms(branch.id);
                       }}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#c5a880]/40 hover:border-[#c5a880] hover:bg-[#c5a880] hover:text-[#0b0c0e] text-xs uppercase tracking-wider text-[#e0ded8] transition-all duration-300 font-medium cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#c5a880]/40 hover:border-[#c5a880] hover:bg-[#c5a880] hover:text-[#0b0c0e] text-xs uppercase tracking-wider text-[#e0ded8] transition-colors duration-200 font-medium cursor-pointer"
                     >
                       <span>View Suites</span>
                       <ChevronRight className="w-3 h-3" />
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

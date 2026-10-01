@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { HotelProvider, useHotel } from './context/HotelContext';
 import { WelcomeSplash } from './components/WelcomeSplash';
 import { Navbar } from './components/Navbar';
@@ -15,7 +16,7 @@ import { Footer } from './components/Footer';
 import { Room, Booking } from './types';
 
 const MainAppContent: React.FC = () => {
-  const { rooms, setSelectedBranchId, messages } = useHotel();
+  const { setSelectedBranchId, messages } = useHotel();
   const [activeView, setActiveView] = useState<'home' | 'dashboard' | 'admin'>('home');
   const [selectedRoomForBooking, setSelectedRoomForBooking] = useState<Room | null>(null);
   const [justConfirmedBookingCode, setJustConfirmedBookingCode] = useState<string | undefined>(undefined);
@@ -63,49 +64,75 @@ const MainAppContent: React.FC = () => {
         unreadAdminMessagesCount={unreadGuestMessages}
       />
 
-      {/* Main Content Router */}
+      {/* Main Content Router with Smooth View Transitions */}
       <main className="flex-1 pb-16">
-        {activeView === 'home' && (
-          <>
-            <HeroSection
-              onSearch={handleHeroSearch}
-              onExploreClick={() => handleNavigateToSection('suites')}
-            />
+        <AnimatePresence mode="wait">
+          {activeView === 'home' && (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <HeroSection
+                onSearch={handleHeroSearch}
+                onExploreClick={() => handleNavigateToSection('suites')}
+              />
 
-            <BranchesPanel onSelectBranchRooms={handleSelectBranchRooms} />
+              <BranchesPanel onSelectBranchRooms={handleSelectBranchRooms} />
 
-            <RoomsGrid onSelectRoom={(room) => setSelectedRoomForBooking(room)} />
+              <RoomsGrid onSelectRoom={(room) => setSelectedRoomForBooking(room)} />
 
-            <ExperienceSection />
+              <ExperienceSection />
 
-            <Footer
-              onNavigateToSection={handleNavigateToSection}
-              onOpenAdmin={() => setActiveView('admin')}
-              onOpenDashboard={() => setActiveView('dashboard')}
-            />
-          </>
-        )}
+              <Footer
+                onNavigateToSection={handleNavigateToSection}
+                onOpenAdmin={() => setActiveView('admin')}
+                onOpenDashboard={() => setActiveView('dashboard')}
+              />
+            </motion.div>
+          )}
 
-        {activeView === 'dashboard' && (
-          <CustomerDashboard
-            onBackToHome={() => setActiveView('home')}
-            selectedBookingCode={justConfirmedBookingCode}
-          />
-        )}
+          {activeView === 'dashboard' && (
+            <motion.div
+              key="dashboard"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <CustomerDashboard
+                onBackToHome={() => setActiveView('home')}
+                selectedBookingCode={justConfirmedBookingCode}
+              />
+            </motion.div>
+          )}
 
-        {activeView === 'admin' && (
-          <AdminPanel onBackToHome={() => setActiveView('home')} />
-        )}
+          {activeView === 'admin' && (
+            <motion.div
+              key="admin"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <AdminPanel onBackToHome={() => setActiveView('home')} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
-      {/* Booking Modal with Dynamic UPI QR Code */}
-      {selectedRoomForBooking && (
-        <BookingModal
-          room={selectedRoomForBooking}
-          onClose={() => setSelectedRoomForBooking(null)}
-          onBookingConfirmed={handleBookingConfirmed}
-        />
-      )}
+      {/* Booking Modal with Dynamic UPI QR Code & Animations */}
+      <AnimatePresence>
+        {selectedRoomForBooking && (
+          <BookingModal
+            room={selectedRoomForBooking}
+            onClose={() => setSelectedRoomForBooking(null)}
+            onBookingConfirmed={handleBookingConfirmed}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Promotional Bottom Banner with Social Links */}
       <BottomPromoBanner />

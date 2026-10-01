@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Calendar,
   MapPin,
@@ -362,8 +363,11 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
                       bookingMessages.map((msg) => {
                         const isGuest = msg.sender === 'guest';
                         return (
-                          <div
+                          <motion.div
                             key={msg.id}
+                            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                             className={`flex flex-col ${isGuest ? 'items-end' : 'items-start'}`}
                           >
                             <span className="text-[10px] text-[#736e65] mb-1 px-1">
@@ -376,13 +380,13 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
                             <div
                               className={`max-w-md p-3.5 rounded-2xl text-xs leading-relaxed ${
                                 isGuest
-                                  ? 'bg-[#c5a880] text-[#090a0d] rounded-tr-none font-medium'
-                                  : 'bg-[#181b24] text-[#ece7dc] border border-[#292d3a] rounded-tl-none'
+                                  ? 'bg-[#c5a880] text-[#090a0d] rounded-tr-none font-medium shadow-md'
+                                  : 'bg-[#181b24] text-[#ece7dc] border border-[#292d3a] rounded-tl-none shadow-md'
                               }`}
                             >
                               {msg.text}
                             </div>
-                          </div>
+                          </motion.div>
                         );
                       })
                     )}
