@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Branch, Room, Booking, ChatMessage, PromotionalOffer, HotelContent } from '../types';
+import { resolveHotelImage } from '../utils/imageAssets';
 import {
   INITIAL_BRANCHES,
   INITIAL_ROOMS,
@@ -50,12 +51,14 @@ const STORAGE_KEYS = {
 export const HotelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [branches, setBranches] = useState<Branch[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.BRANCHES);
-    return saved ? JSON.parse(saved) : INITIAL_BRANCHES;
+    const data: Branch[] = saved ? JSON.parse(saved) : INITIAL_BRANCHES;
+    return data.map((b) => ({ ...b, image: resolveHotelImage(b.image) }));
   });
 
   const [rooms, setRooms] = useState<Room[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.ROOMS);
-    return saved ? JSON.parse(saved) : INITIAL_ROOMS;
+    const data: Room[] = saved ? JSON.parse(saved) : INITIAL_ROOMS;
+    return data.map((r) => ({ ...r, image: resolveHotelImage(r.image) }));
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {

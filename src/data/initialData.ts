@@ -1,4 +1,5 @@
 import { Branch, Room, Booking, ChatMessage, PromotionalOffer, HotelContent } from '../types';
+import { ASSET_IMAGES } from '../utils/imageAssets';
 
 export const INITIAL_BRANCHES: Branch[] = [
   {
@@ -16,7 +17,7 @@ export const INITIAL_BRANCHES: Branch[] = [
       'Royal Mewari Banquet with live Santoor recital',
       'Signature Ayurvedic Rasayana Rejuvenation'
     ],
-    image: '/src/assets/images/branch_palace_retreat_1790862196769.jpg',
+    image: ASSET_IMAGES.palace,
     rating: 4.96,
     climateNote: 'Mild winters & serene lakeside breezes'
   },
@@ -35,7 +36,7 @@ export const INITIAL_BRANCHES: Branch[] = [
       'Artisanal Portuguese-Goan Wine Pairing Degustation',
       'Oceanfront Thermal Infinity Mineral Pool'
     ],
-    image: '/src/assets/images/hero_luxury_resort_1790862163016.jpg',
+    image: ASSET_IMAGES.hero,
     rating: 4.94,
     climateNote: 'Gentle Arabian Sea whispers & tropical sunsets'
   },
@@ -54,7 +55,7 @@ export const INITIAL_BRANCHES: Branch[] = [
       'Private Fireplace Stargazing with Mulled Spiced Wine',
       'Nordic Hot Stone Hydrotherapy Spa'
     ],
-    image: '/src/assets/images/room_heritage_villa_1790862186800.jpg',
+    image: ASSET_IMAGES.villa,
     rating: 4.98,
     climateNote: 'Crisp mountain air with panoramic snowy ridges'
   },
@@ -73,7 +74,7 @@ export const INITIAL_BRANCHES: Branch[] = [
       'Classical Kathakali & Temple Flute Twilight Performances',
       'Authentic Marma Abhyanga Ayurvedic Rejuvenation'
     ],
-    image: '/src/assets/images/room_presidential_suite_1790862175416.jpg',
+    image: ASSET_IMAGES.presidential,
     rating: 4.95,
     climateNote: 'Emerald backwaters & tranquil lotus breezes'
   },
@@ -92,7 +93,7 @@ export const INITIAL_BRANCHES: Branch[] = [
       'Curated Architectural Walking Odyssey of Heritage Fort',
       'Chauffeured Rolls-Royce City Tour'
     ],
-    image: '/src/assets/images/hero_luxury_resort_1790862163016.jpg',
+    image: ASSET_IMAGES.hero,
     rating: 4.92,
     climateNote: 'Seafront cosmopolitan energy and balmy evenings'
   }
@@ -112,7 +113,7 @@ export const INITIAL_ROOMS: Room[] = [
     view: 'Panoramic Lake Pichola & City Palace Waterfront',
     rating: 4.99,
     reviewsCount: 142,
-    image: '/src/assets/images/room_presidential_suite_1790862175416.jpg',
+    image: ASSET_IMAGES.presidential,
     features: [
       '24-Hour Private Butler Service',
       'Private Heated Infinity Plunge Pool',
@@ -136,7 +137,7 @@ export const INITIAL_ROOMS: Room[] = [
     view: 'Private Lotus Pond & Mughal Garden',
     rating: 4.95,
     reviewsCount: 198,
-    image: '/src/assets/images/room_heritage_villa_1790862186800.jpg',
+    image: ASSET_IMAGES.villa,
     features: [
       'Freestanding Monolithic Travertine Soaking Tub',
       'Outdoor Rain Shower in Private Courtyard',
@@ -159,7 +160,7 @@ export const INITIAL_ROOMS: Room[] = [
     view: 'Unobstructed Arabian Sea & Sunset Horizon',
     rating: 4.97,
     reviewsCount: 174,
-    image: '/src/assets/images/hero_luxury_resort_1790862163016.jpg',
+    image: ASSET_IMAGES.hero,
     features: [
       'Expansive Teak Sun Deck with Double Daybed',
       'Direct Private Beach Access Stairway',
@@ -182,7 +183,7 @@ export const INITIAL_ROOMS: Room[] = [
     view: 'Snowcapped Himalayan Peaks & Pine Valley',
     rating: 4.94,
     reviewsCount: 112,
-    image: '/src/assets/images/room_heritage_villa_1790862186800.jpg',
+    image: ASSET_IMAGES.villa,
     features: [
       'Wood-Burning Fireplace with Cedarwood logs',
       'Handwoven Pure Pashmina Throws',
@@ -205,7 +206,7 @@ export const INITIAL_ROOMS: Room[] = [
     view: 'Vembanad Backwaters & Floating Water Lilies',
     rating: 4.96,
     reviewsCount: 156,
-    image: '/src/assets/images/room_presidential_suite_1790862175416.jpg',
+    image: ASSET_IMAGES.presidential,
     features: [
       'Private Plunge Pool Overlooking Waterways',
       'Private Jetty with Traditional Canoe',
@@ -228,7 +229,7 @@ export const INITIAL_ROOMS: Room[] = [
     view: 'Gateway Promenade & Mumbai Harbor',
     rating: 4.93,
     reviewsCount: 220,
-    image: '/src/assets/images/branch_palace_retreat_1790862196769.jpg',
+    image: ASSET_IMAGES.palace,
     features: [
       'Dedicated Bentley/Rolls Airport Concierge',
       'Private Cocktail Bar & Sommelier Selection',

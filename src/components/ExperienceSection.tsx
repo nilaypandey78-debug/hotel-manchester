@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { ASSET_IMAGES } from '../utils/imageAssets';
 
 export const ExperienceSection: React.FC = () => {
   return (
@@ -48,7 +49,7 @@ export const ExperienceSection: React.FC = () => {
 
             <div className="relative aspect-[21/9] overflow-hidden bg-[#161820] mx-8 mb-8 rounded-2xl">
               <img
-                src="/src/assets/images/branch_palace_retreat_1790862196769.jpg"
+                src={ASSET_IMAGES.palace}
                 alt="Manchester Palace Sanctuary Dining"
                 className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
               />

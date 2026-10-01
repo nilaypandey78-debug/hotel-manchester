@@ -3,6 +3,7 @@ import { useHotel } from '../context/HotelContext';
 import { Room } from '../types';
 import { Check, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { resolveHotelImage, ASSET_IMAGES } from '../utils/imageAssets';
 
 interface RoomsGridProps {
   onSelectRoom: (room: Room) => void;
@@ -116,9 +117,12 @@ export const RoomsGrid: React.FC<RoomsGridProps> = ({ onSelectRoom }) => {
                   {/* Visual Asset Container with Fallback */}
                   <div className="relative aspect-[16/10] overflow-hidden bg-[#181a20]">
                     <img
-                      src={room.image}
+                      src={resolveHotelImage(room.image)}
                       alt={room.name}
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.src = ASSET_IMAGES.hero;
+                      }}
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#121418] via-transparent to-transparent" />

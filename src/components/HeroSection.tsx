@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, Users, MapPin, ArrowDown, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useHotel } from '../context/HotelContext';
+import { ASSET_IMAGES } from '../utils/imageAssets';
 
 interface HeroSectionProps {
   onSearch: (branchId: string, dates: { checkIn: string; checkOut: string }, guests: number) => void;
@@ -52,7 +53,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, onExploreCli
           initial={{ scale: 1.1, opacity: 0.8 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
-          src="/src/assets/images/hero_luxury_resort_1790862163016.jpg"
+          src={ASSET_IMAGES.hero}
           alt="Hotel Manchester Luxury Sanctuary"
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center"

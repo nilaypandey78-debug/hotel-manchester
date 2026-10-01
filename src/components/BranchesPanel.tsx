@@ -3,6 +3,7 @@ import { MapPin, Phone, Sparkles, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useHotel } from '../context/HotelContext';
 import { Branch } from '../types';
+import { resolveHotelImage, ASSET_IMAGES } from '../utils/imageAssets';
 
 interface BranchesPanelProps {
   onSelectBranchRooms: (branchId: string) => void;
@@ -58,9 +59,12 @@ export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRoom
                 {/* Branch Image with Hover Zoom */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-[#181a20]">
                   <img
-                    src={branch.image}
+                    src={resolveHotelImage(branch.image)}
                     alt={branch.name}
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.src = ASSET_IMAGES.palace;
+                    }}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#111317] via-[#111317]/25 to-transparent" />

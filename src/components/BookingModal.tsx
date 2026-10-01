@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useHotel } from '../context/HotelContext';
 import { Room, Booking } from '../types';
+import { resolveHotelImage, ASSET_IMAGES } from '../utils/imageAssets';
 
 interface BookingModalProps {
   room: Room;
@@ -228,8 +229,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
               {/* Room summary banner */}
               <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-[#14161c] border border-[#22252e]">
                 <img
-                  src={room.image}
+                  src={resolveHotelImage(room.image)}
                   alt={room.name}
+                  onError={(e) => {
+                    e.currentTarget.src = ASSET_IMAGES.hero;
+                  }}
                   className="w-full sm:w-36 h-24 object-cover rounded-lg"
                 />
                 <div className="flex-1">
