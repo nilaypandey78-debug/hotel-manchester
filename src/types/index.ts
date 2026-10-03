@@ -31,6 +31,9 @@ export interface Branch {
   image: string;
   rating: number;
   climateNote: string;
+  archived?: boolean;
+  archivedAt?: string;
+  createdAt?: string;
 }
 
 export interface BookingGuestDetails {

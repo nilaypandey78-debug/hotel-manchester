@@ -12,6 +12,8 @@ import {
 
 interface HotelContextType {
   branches: Branch[];
+  activeBranches: Branch[];
+  archivedBranches: Branch[];
   rooms: Room[];
   bookings: Booking[];
   messages: ChatMessage[];
@@ -23,7 +25,11 @@ interface HotelContextType {
   updateRoom: (room: Room) => void;
   toggleRoomAvailability: (roomId: string) => void;
   // Branch actions
+  addBranch: (branch: Omit<Branch, 'id' | 'createdAt'>) => Branch;
   updateBranch: (branch: Branch) => void;
+  removeBranch: (branchId: string) => void;
+  restoreBranch: (branchId: string) => void;
+  deleteBranchPermanently: (branchId: string) => void;
   // Booking actions
   createBooking: (booking: Omit<Booking, 'id' | 'bookingCode' | 'createdAt'>) => Booking;
   updateBookingStatus: (bookingId: string, status: Booking['paymentStatus']) => void;
@@ -78,7 +84,16 @@ export const HotelProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [hotelContent, setHotelContent] = useState<HotelContent>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CONTENT);
-    return saved ? JSON.parse(saved) : INITIAL_HOTEL_CONTENT;
+    if (!saved) return INITIAL_HOTEL_CONTENT;
+    try {
+      const parsed = JSON.parse(saved);
+      if (!parsed.whatsappNumber || parsed.whatsappNumber === '+919876543210') {
+        parsed.whatsappNumber = '+91 91712 90395';
+      }
+      return parsed;
+    } catch {
+      return INITIAL_HOTEL_CONTENT;
+    }
   });
 
   const [selectedBranchId, setSelectedBranchId] = useState<string>('all');
@@ -118,6 +133,36 @@ export const HotelProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateBranch = (updated: Branch) => {
     setBranches(prev => prev.map(b => b.id === updated.id ? updated : b));
   };
+
+  const addBranch = (branchData: Omit<Branch, 'id' | 'createdAt'>): Branch => {
+    const slug = branchData.city.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'estate';
+    const newBranch: Branch = {
+      ...branchData,
+      id: `branch-${slug}-${Date.now().toString().slice(-4)}`,
+      image: resolveHotelImage(branchData.image),
+      archived: false,
+      createdAt: new Date().toISOString(),
+    };
+    setBranches(prev => [newBranch, ...prev]);
+    return newBranch;
+  };
+
+  const removeBranch = (branchId: string) => {
+    // Soft remove / archive branch page so public website hides it but admin can restore anytime
+    setBranches(prev => prev.map(b => b.id === branchId ? { ...b, archived: true, archivedAt: new Date().toISOString() } : b));
+  };
+
+  const restoreBranch = (branchId: string) => {
+    // Restore removed branch page back to the public website
+    setBranches(prev => prev.map(b => b.id === branchId ? { ...b, archived: false, archivedAt: undefined } : b));
+  };
+
+  const deleteBranchPermanently = (branchId: string) => {
+    setBranches(prev => prev.filter(b => b.id !== branchId));
+  };
+
+  const activeBranches = branches.filter(b => !b.archived);
+  const archivedBranches = branches.filter(b => !!b.archived);
 
   const createBooking = (bookingData: Omit<Booking, 'id' | 'bookingCode' | 'createdAt'>): Booking => {
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
@@ -202,6 +247,8 @@ export const HotelProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <HotelContext.Provider
       value={{
         branches,
+        activeBranches,
+        archivedBranches,
         rooms,
         bookings,
         messages,
@@ -211,7 +258,11 @@ export const HotelProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedBranchId,
         updateRoom,
         toggleRoomAvailability,
+        addBranch,
         updateBranch,
+        removeBranch,
+        restoreBranch,
+        deleteBranchPermanently,
         createBooking,
         updateBookingStatus,
         verifyBookingUtr,

@@ -268,7 +268,7 @@ export const INITIAL_HOTEL_CONTENT: HotelContent = {
   welcomingHeadline: 'Where timeless serenity meets refined aristocratic hospitality',
   contactNumber: '+91 22 8899 4400',
   conciergeEmail: 'concierge@hotelmanchester.com',
-  whatsappNumber: '+919876543210',
+  whatsappNumber: '+91 91712 90395',
   upiVpa: 'hotelmanchester@icici',
   upiPayeeName: 'Hotel Manchester Luxury Resorts Ltd',
   heroSubtitle: 'Immerse in sanctuaries crafted across India’s most breathtaking landscapes, from royal lakeside palaces to secluded cliffside estates.',

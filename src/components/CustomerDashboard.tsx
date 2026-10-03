@@ -52,9 +52,8 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
 
   const activeBooking = bookings.find((b) => b.id === activeBookingId) || filteredBookings[0];
 
-  const bookingMessages = activeBooking
-    ? messages.filter((m) => m.bookingId === activeBooking.id)
-    : [];
+  // Messages thread for this booking
+  const activeMessages = messages.filter((m) => m.bookingId === activeBooking?.id);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,80 +73,86 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
     switch (status) {
       case 'verified':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-[11px] text-emerald-300 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            Verified &amp; Guaranteed
-          </span>
-        );
-      case 'pending_upi':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/70 border border-amber-500/40 text-[11px] text-amber-300 font-medium">
-            <Hourglass className="w-3.5 h-3.5 text-amber-400" />
-            Awaiting Concierge Verification
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-xs text-emerald-800 font-semibold shadow-sm">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Verified &amp; Reserved
           </span>
         );
       case 'checked_in':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-950/70 border border-blue-500/40 text-[11px] text-blue-300 font-medium">
-            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-            Checked In · Enjoy Your Sanctuary
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-300 text-xs text-blue-800 font-semibold shadow-sm">
+            <Clock className="w-3.5 h-3.5" />
+            Checked In
           </span>
         );
       case 'cancelled':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/70 border border-rose-500/40 text-[11px] text-rose-300 font-medium">
-            <XCircle className="w-3.5 h-3.5 text-rose-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 border border-neutral-300 text-xs text-neutral-600 font-medium">
+            <XCircle className="w-3.5 h-3.5" />
             Cancelled
           </span>
         );
+      case 'pending_upi':
       default:
-        return null;
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-300 text-xs text-amber-800 font-semibold shadow-sm">
+            <Hourglass className="w-3.5 h-3.5 animate-spin" />
+            Awaiting Verification
+          </span>
+        );
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#090a0d] text-[#ede8df] py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Top Bar Navigation */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 mb-8 border-b border-[#1c1f27]">
-          <div>
-            <button
-              onClick={onBackToHome}
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#a8a39a] hover:text-[#c5a880] transition-colors mb-3 cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Return to Sanctuaries</span>
-            </button>
-            <h1 className="font-serif-luxury text-3xl sm:text-4xl font-light text-[#f7f3ec]">
-              Guest Sanctuary Portal
-            </h1>
-            <p className="text-xs text-[#8c877e] mt-1 font-light">
-              Manage your retreat reservations, cross-reference UPI receipts, and talk directly to your personal resort concierge.
-            </p>
-          </div>
+    <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 bg-[#FAF8F5]">
+      {/* Back button and page title */}
+      <div className="flex items-center justify-between border-b border-[#EAE4DA] pb-6">
+        <button
+          onClick={onBackToHome}
+          className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#78716C] hover:text-[#1C1917] transition-colors cursor-pointer group font-semibold"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-[#946E3A]" />
+          <span>Return to Hotel Manchester</span>
+        </button>
 
-          {/* Quick Search */}
+        <div className="text-right">
+          <span className="text-[10px] uppercase tracking-widest text-[#946E3A] block font-semibold">
+            Guest Portal
+          </span>
+          <h1 className="font-serif-luxury text-2xl sm:text-3xl text-[#1C1917] font-light">
+            Sanctuary Reservations
+          </h1>
+        </div>
+      </div>
+
+      {/* Main Body */}
+      <div className="space-y-6">
+        {/* Search / Filter Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-[#EAE4DA] shadow-sm">
+          <div className="text-xs text-[#57534E]">
+            Search by your <span className="font-mono text-[#946E3A] font-semibold">HM-XXXX</span> booking reference or guest email.
+          </div>
           <div className="w-full sm:w-72">
             <input
               type="text"
               placeholder="Search code or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-full bg-[#13151b] border border-[#272b35] text-xs text-[#f7f3ec] placeholder:text-[#6a655c] focus:outline-none focus:border-[#c5a880]"
+              className="w-full px-4 py-2 rounded-full bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:border-[#946E3A]"
             />
           </div>
         </div>
 
         {filteredBookings.length === 0 ? (
-          <div className="text-center py-20 bg-[#101217] rounded-3xl border border-[#20232c] max-w-lg mx-auto p-8">
-            <Calendar className="w-12 h-12 text-[#68635a] mx-auto mb-4" />
-            <h3 className="font-serif-luxury text-xl text-[#f7f3ec] mb-2">No Reservations Found</h3>
-            <p className="text-xs text-[#8a857b] mb-6">
+          <div className="text-center py-20 bg-white rounded-3xl border border-[#EAE4DA] max-w-lg mx-auto p-8 shadow-sm">
+            <Calendar className="w-12 h-12 text-[#A8A29E] mx-auto mb-4" />
+            <h3 className="font-serif-luxury text-xl text-[#1C1917] mb-2">No Reservations Found</h3>
+            <p className="text-xs text-[#78716C] mb-6">
               You haven't reserved a sanctuary yet or the booking code doesn't match our records.
             </p>
             <button
               onClick={onBackToHome}
-              className="px-6 py-2.5 rounded-full bg-[#c5a880] text-[#090a0d] text-xs uppercase tracking-widest font-semibold cursor-pointer"
+              className="px-6 py-2.5 rounded-full bg-[#1C1917] text-white text-xs uppercase tracking-widest font-semibold hover:bg-[#946E3A] transition-colors cursor-pointer"
             >
               Explore Accommodations
             </button>
@@ -156,7 +161,7 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Left Column: Booking Selector List */}
             <div className="lg:col-span-4 space-y-4">
-              <div className="text-[11px] uppercase tracking-widest text-[#827d74] font-medium px-1">
+              <div className="text-[11px] uppercase tracking-widest text-[#78716C] font-semibold px-1">
                 Your Sanctuary Stays ({filteredBookings.length})
               </div>
 
@@ -166,31 +171,31 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
                   <button
                     key={b.id}
                     onClick={() => setActiveBookingId(b.id)}
-                    className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                    className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 cursor-pointer shadow-sm ${
                       isSelected
-                        ? 'bg-[#151821] border-[#c5a880] shadow-xl'
-                        : 'bg-[#101218] border-[#20232b] hover:border-[#303440]'
+                        ? 'bg-white border-[#946E3A] shadow-md ring-1 ring-[#946E3A]'
+                        : 'bg-white border-[#EAE4DA] hover:border-[#D8D0C5]'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-mono text-xs font-semibold text-[#c5a880]">
+                      <span className="font-mono text-xs font-semibold text-[#946E3A]">
                         {b.bookingCode}
                       </span>
                       {getStatusBadge(b.paymentStatus)}
                     </div>
 
-                    <h4 className="font-serif-luxury text-lg text-[#f7f3ec] font-normal truncate">
+                    <h4 className="font-serif-luxury text-lg text-[#1C1917] font-medium truncate">
                       {b.roomName}
                     </h4>
 
-                    <div className="text-xs text-[#8c877e] mt-1 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#c5a880] shrink-0" />
+                    <div className="text-xs text-[#78716C] mt-1 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[#946E3A] shrink-0" />
                       <span className="truncate">{b.branchName}</span>
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-[#1c1f27] flex items-center justify-between text-xs font-mono">
-                      <span className="text-[#a8a39a]">{b.checkInDate}</span>
-                      <span className="text-[#f7f3ec] font-semibold">
+                    <div className="mt-3 pt-3 border-t border-[#F2ECE3] flex items-center justify-between text-xs font-mono">
+                      <span className="text-[#78716C]">{b.checkInDate}</span>
+                      <span className="text-[#1C1917] font-semibold">
                         ₹{b.totalAmount.toLocaleString('en-IN')}
                       </span>
                     </div>
@@ -203,18 +208,18 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
             {activeBooking && (
               <div className="lg:col-span-8 space-y-6">
                 {/* Active Booking Hero Card */}
-                <div className="p-6 sm:p-8 rounded-3xl bg-[#111319] border border-[#21242e] shadow-2xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#212530] gap-4">
+                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EAE4DA] shadow-md">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#F0EAE1] gap-4">
                     <div>
-                      <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#827d74] font-medium">
+                      <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
                         <span>Sanctuary Voucher</span>
                         <span aria-hidden="true">·</span>
-                        <span className="font-mono text-[#c5a880]">{activeBooking.bookingCode}</span>
+                        <span className="font-mono text-[#946E3A]">{activeBooking.bookingCode}</span>
                       </div>
-                      <h2 className="font-serif-luxury text-2xl sm:text-3xl font-light text-[#f7f3ec] mt-1">
+                      <h2 className="font-serif-luxury text-2xl sm:text-3xl font-light text-[#1C1917] mt-1">
                         {activeBooking.roomName}
                       </h2>
-                      <p className="text-xs text-[#9c968b] mt-0.5">{activeBooking.branchName}</p>
+                      <p className="text-xs text-[#78716C] mt-0.5">{activeBooking.branchName}</p>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -222,7 +227,7 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
                       <button
                         onClick={() => window.print()}
                         title="Print sanctuary confirmation voucher"
-                        className="p-2.5 rounded-full border border-[#2d313d] hover:border-[#c5a880] text-[#c5a880] hover:bg-[#1a1c24] transition-colors"
+                        className="p-2.5 rounded-full border border-[#D8D0C5] hover:border-[#946E3A] text-[#946E3A] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
                       >
                         <Download className="w-4 h-4" />
                       </button>
@@ -230,90 +235,72 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
                   </div>
 
                   {/* Summary Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-6 border-b border-[#212530] text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-6 border-b border-[#F0EAE1] text-xs">
                     <div>
-                      <span className="text-[#827d74] block text-[10px] uppercase tracking-wider mb-1">
+                      <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-semibold mb-1">
                         Dates of Stay
                       </span>
-                      <span className="text-[#f7f3ec] font-medium">
+                      <span className="text-[#1C1917] font-semibold">
                         {activeBooking.checkInDate} — {activeBooking.checkOutDate}
                       </span>
-                      <span className="text-[#827d74] block text-[11px] mt-0.5">
+                      <span className="text-[#78716C] block text-[11px] mt-0.5">
                         ({activeBooking.nights} Nights)
                       </span>
                     </div>
 
                     <div>
-                      <span className="text-[#827d74] block text-[10px] uppercase tracking-wider mb-1">
+                      <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-semibold mb-1">
                         Reserved For
                       </span>
-                      <span className="text-[#f7f3ec] font-medium">
+                      <span className="text-[#1C1917] font-semibold">
                         {activeBooking.guestDetails.fullName}
                       </span>
-                      <span className="text-[#827d74] block text-[11px] mt-0.5">
+                      <span className="text-[#78716C] block text-[11px] mt-0.5">
                         {activeBooking.guests.adults} Adults, {activeBooking.guests.children} Children
                       </span>
                     </div>
 
                     <div>
-                      <span className="text-[#827d74] block text-[10px] uppercase tracking-wider mb-1">
+                      <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-semibold mb-1">
                         UPI Transaction UTR
                       </span>
-                      <span className="text-[#c5a880] font-mono font-medium">
-                        {activeBooking.guestDetails.upiUtr || 'Pending Submission'}
-                      </span>
-                      <span className="text-[#827d74] block text-[11px] mt-0.5">
-                        VPA: {hotelContent.upiVpa}
+                      <span className="text-[#946E3A] font-mono font-semibold">
+                        {activeBooking.guestDetails.upiUtr || 'Awaiting Verification'}
                       </span>
                     </div>
 
                     <div>
-                      <span className="text-[#827d74] block text-[10px] uppercase tracking-wider mb-1">
-                        Tariff Paid
+                      <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-semibold mb-1">
+                        Total Tariff
                       </span>
-                      <span className="font-serif-luxury text-xl text-[#f7f3ec] font-normal">
+                      <span className="font-serif-luxury text-xl font-bold text-[#946E3A]">
                         ₹{activeBooking.totalAmount.toLocaleString('en-IN')}
                       </span>
                     </div>
                   </div>
 
-                  {/* Tailored Add-Ons & Preferences */}
-                  <div className="py-4 border-b border-[#212530] flex flex-wrap gap-4 text-xs">
-                    {activeBooking.addOns.length > 0 && (
-                      <div className="flex-1">
-                        <span className="text-[#827d74] block text-[10px] uppercase tracking-wider mb-1.5">
-                          Selected Bespoke Add-ons
+                  {/* Curated Inclusions */}
+                  <div className="py-6 border-b border-[#F0EAE1] space-y-3">
+                    <span className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold block">
+                      Confirmed Itinerary Inclusions
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {activeBooking.addOns.map((add, i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#EAE4DA] text-xs text-[#44403C] font-medium"
+                        >
+                          ✦ {add}
                         </span>
-                        <div className="flex flex-wrap gap-2">
-                          {activeBooking.addOns.map((add, i) => (
-                            <span
-                              key={i}
-                              className="px-2.5 py-1 rounded-md bg-[#181a22] text-[#d4cebe] border border-[#2b2f3a]"
-                            >
-                              {add}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {activeBooking.guestDetails.pillowPreference && (
-                      <div>
-                        <span className="text-[#827d74] block text-[10px] uppercase tracking-wider mb-1.5">
-                          Pillow Request
-                        </span>
-                        <span className="text-[#ede8df]">
-                          {activeBooking.guestDetails.pillowPreference}
-                        </span>
-                      </div>
-                    )}
+                      ))}
+                    </div>
                   </div>
 
                   {/* Cancellation Action */}
                   {activeBooking.paymentStatus !== 'cancelled' && (
-                    <div className="pt-4 flex items-center justify-between text-xs">
-                      <span className="text-[#7a756c]">
-                        Need to adjust dates or cancel your sanctuary stay?
+                    <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <span className="text-xs text-[#78716C]">
+                        Need modifications? Message our concierge below or cancel directly.
                       </span>
                       <button
                         onClick={() => {
@@ -321,96 +308,99 @@ export const CustomerDashboard: React.FC<CustomerDashboardProps> = ({
                             cancelBooking(activeBooking.id);
                           }
                         }}
-                        className="text-rose-400/80 hover:text-rose-300 underline cursor-pointer"
+                        className="text-xs text-rose-700 hover:text-rose-900 hover:underline cursor-pointer font-medium"
                       >
-                        Request Reservation Cancellation
+                        Cancel Reservation
                       </button>
                     </div>
                   )}
                 </div>
 
-                {/* Built-in Two-Way Messaging with Resort Concierge */}
-                <div className="rounded-3xl bg-[#111319] border border-[#21242e] shadow-2xl overflow-hidden flex flex-col h-[460px]">
+                {/* 24/7 Live Concierge Chat Thread for this Reservation */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EAE4DA] shadow-md flex flex-col h-[520px]">
                   {/* Chat Header */}
-                  <div className="px-6 py-4 bg-[#141720] border-b border-[#212530] flex items-center justify-between">
+                  <div className="pb-4 border-b border-[#F0EAE1] flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#1e222d] border border-[#c5a880]/40 flex items-center justify-center text-[#c5a880]">
-                        <MessageSquare className="w-4 h-4" />
+                      <div className="w-10 h-10 rounded-full bg-[#FAF5EC] border border-[#E8DCC8] flex items-center justify-center text-[#946E3A]">
+                        <MessageSquare className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="text-sm font-medium text-[#f7f3ec]">
-                          Resort Concierge Desk
-                        </h4>
-                        <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          <span>Active 24/7 Dedicated Support</span>
-                        </div>
+                        <h3 className="font-serif-luxury text-lg text-[#1C1917] font-medium">
+                          Chief Concierge Desk
+                        </h3>
+                        <p className="text-[11px] text-emerald-700 flex items-center gap-1 font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>Direct Assistant Online</span>
+                        </p>
                       </div>
                     </div>
 
-                    <div className="text-xs text-[#827d74]">
-                      Ref: <span className="font-mono text-[#c5a880]">{activeBooking.bookingCode}</span>
-                    </div>
+                    <a
+                      href={`https://wa.me/${hotelContent.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-xs text-emerald-800 font-semibold hover:bg-emerald-100 transition-colors"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>WhatsApp Concierge</span>
+                    </a>
                   </div>
 
-                  {/* Messages Stream */}
-                  <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-[#0e1015]/60">
-                    {bookingMessages.length === 0 ? (
-                      <div className="text-center py-12 text-xs text-[#736e65]">
-                        No prior messages. Inquire about private dining, airport transfers, or custom arrangements.
+                  {/* Messages Feed */}
+                  <div className="flex-1 overflow-y-auto py-4 space-y-4">
+                    {activeMessages.length === 0 ? (
+                      <div className="text-center py-12 text-xs text-[#78716C]">
+                        Your dedicated concierge has been assigned. Send any requests for early arrival, champagne, or private dining.
                       </div>
                     ) : (
-                      bookingMessages.map((msg) => {
+                      activeMessages.map((msg) => {
                         const isGuest = msg.sender === 'guest';
                         return (
-                          <motion.div
+                          <div
                             key={msg.id}
-                            initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                             className={`flex flex-col ${isGuest ? 'items-end' : 'items-start'}`}
                           >
-                            <span className="text-[10px] text-[#736e65] mb-1 px-1">
-                              {isGuest ? 'You (Guest)' : 'Resort Concierge'} ·{' '}
+                            <span className="text-[10px] text-[#A8A29E] mb-1 px-1">
+                              {isGuest ? 'You' : 'Sanctuary Concierge'} ·{' '}
                               {new Date(msg.timestamp).toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit',
                               })}
                             </span>
                             <div
-                              className={`max-w-md p-3.5 rounded-2xl text-xs leading-relaxed ${
+                              className={`max-w-md p-4 rounded-2xl text-xs leading-relaxed shadow-sm ${
                                 isGuest
-                                  ? 'bg-[#c5a880] text-[#090a0d] rounded-tr-none font-medium shadow-md'
-                                  : 'bg-[#181b24] text-[#ece7dc] border border-[#292d3a] rounded-tl-none shadow-md'
+                                  ? 'bg-[#1C1917] text-[#FAF8F5] rounded-br-none'
+                                  : 'bg-[#FAF8F5] border border-[#EAE4DA] text-[#1C1917] rounded-bl-none'
                               }`}
                             >
                               {msg.text}
                             </div>
-                          </motion.div>
+                          </div>
                         );
                       })
                     )}
                   </div>
 
-                  {/* Chat Input Bar */}
+                  {/* Message Input Form */}
                   <form
                     onSubmit={handleSendMessage}
-                    className="p-3 bg-[#13151c] border-t border-[#212530] flex items-center gap-2"
+                    className="pt-4 border-t border-[#F0EAE1] flex items-center gap-3"
                   >
                     <input
                       type="text"
-                      placeholder="Message the Hotel Manchester concierge team..."
+                      placeholder="Message your Chief Concierge regarding this stay..."
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
-                      className="flex-1 px-4 py-2.5 rounded-full bg-[#1b1e27] border border-[#2b2f3c] text-xs text-[#f7f3ec] placeholder:text-[#6e695f] focus:outline-none focus:border-[#c5a880]"
+                      className="flex-1 px-4 py-2.5 rounded-full bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] placeholder:text-[#A8A29E] focus:outline-none focus:border-[#946E3A]"
                     />
                     <button
                       type="submit"
                       disabled={!chatInput.trim()}
-                      className={`p-2.5 rounded-full transition-all duration-200 ${
+                      className={`p-2.5 rounded-full transition-all duration-200 cursor-pointer shadow-sm ${
                         chatInput.trim()
-                          ? 'bg-[#c5a880] text-[#090a0d] cursor-pointer hover:bg-[#d8be96]'
-                          : 'bg-[#22252e] text-[#55524c] cursor-not-allowed'
+                          ? 'bg-[#1C1917] text-white hover:bg-[#946E3A]'
+                          : 'bg-[#EAE4DA] text-[#A8A29E] cursor-not-allowed'
                       }`}
                     >
                       <Send className="w-4 h-4" />

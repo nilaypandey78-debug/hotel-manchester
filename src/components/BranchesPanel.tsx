@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Phone, Sparkles, ChevronRight } from 'lucide-react';
+import { MapPin, Phone, Sparkles, ChevronRight, Compass } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useHotel } from '../context/HotelContext';
 import { Branch } from '../types';
@@ -7,15 +7,19 @@ import { resolveHotelImage, ASSET_IMAGES } from '../utils/imageAssets';
 
 interface BranchesPanelProps {
   onSelectBranchRooms: (branchId: string) => void;
+  onOpenBranchPage: (branch: Branch) => void;
 }
 
-export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRooms }) => {
-  const { branches, selectedBranchId, setSelectedBranchId } = useHotel();
+export const BranchesPanel: React.FC<BranchesPanelProps> = ({
+  onSelectBranchRooms,
+  onOpenBranchPage,
+}) => {
+  const { activeBranches, selectedBranchId, setSelectedBranchId } = useHotel();
 
   return (
-    <section id="branches" className="py-24 bg-[#090a0c] border-t border-[#1c1e24] overflow-hidden">
+    <section id="branches" className="py-24 bg-[#FAF8F5] border-t border-[#EAE4DA] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header with Reveal Animation */}
+        {/* Section Header with Light Luxury Elegance */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -24,40 +28,44 @@ export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRoom
           className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
         >
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#c5a880] font-medium mb-3">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-[#946E3A] font-semibold mb-3">
               <span>Nationwide Sanctuaries</span>
               <span aria-hidden="true">·</span>
-              <span>5 Iconic Destinies</span>
+              <span>{activeBranches.length} Iconic Estates</span>
             </div>
-            <h2 className="font-serif-luxury text-3xl sm:text-4xl md:text-5xl font-light text-[#f7f3ec] leading-tight">
+            <h2 className="font-serif-luxury text-3xl sm:text-4xl md:text-5xl font-light text-[#1C1917] leading-tight">
               Retreats across India's most extraordinary terrains.
             </h2>
           </div>
-          <p className="text-sm text-[#9b958b] max-w-md font-light leading-relaxed">
+          <p className="text-sm text-[#57534E] max-w-md font-light leading-relaxed">
             Each Hotel Manchester sanctuary is an architectural devotion to its landscape—from royal lakeside Mewari courtyards to Himalayan cedar ridges.
           </p>
         </motion.div>
 
-        {/* Branch Cards Grid with Staggered Entrance */}
+        {/* Branch Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {branches.map((branch: Branch, idx: number) => {
+          {activeBranches.map((branch: Branch, idx: number) => {
             const isSelected = selectedBranchId === branch.id;
             return (
               <motion.div
                 key={branch.id}
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.65, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, y: 45, filter: 'blur(4px)' }}
+                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={{ duration: 0.75, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -6, transition: { duration: 0.25, ease: 'easeOut' } }}
-                className={`group relative rounded-2xl overflow-hidden bg-[#111317] border transition-all duration-300 flex flex-col justify-between ${
+                className={`group relative rounded-2xl overflow-hidden bg-white border transition-all duration-300 flex flex-col justify-between ${
                   isSelected
-                    ? 'border-[#c5a880] shadow-[0_10px_35px_rgba(197,168,128,0.18)] ring-1 ring-[#c5a880]'
-                    : 'border-[#22252c] hover:border-[#424855] hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
+                    ? 'border-[#946E3A] shadow-[0_12px_35px_rgba(148,110,58,0.15)] ring-1 ring-[#946E3A]'
+                    : 'border-[#EAE4DA] hover:border-[#946E3A] hover:shadow-[0_12px_35px_rgba(0,0,0,0.06)]'
                 }`}
               >
                 {/* Branch Image with Hover Zoom */}
-                <div className="relative aspect-[16/10] overflow-hidden bg-[#181a20]">
+                <div
+                  onClick={() => onOpenBranchPage(branch)}
+                  className="relative aspect-[16/10] overflow-hidden bg-[#EAE4DA] cursor-pointer"
+                  title={`View ${branch.name} sanctuary page`}
+                >
                   <img
                     src={resolveHotelImage(branch.image)}
                     alt={branch.name}
@@ -65,46 +73,51 @@ export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRoom
                     onError={(e) => {
                       e.currentTarget.src = ASSET_IMAGES.palace;
                     }}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111317] via-[#111317]/25 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                   
                   {/* Location badge on top */}
-                  <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0b0c0e]/80 backdrop-blur-md border border-[#2d3038] text-[11px] text-[#e0ded8]">
-                    <MapPin className="w-3 h-3 text-[#c5a880]" />
+                  <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#E8E2D8] text-[11px] text-[#1C1917] font-medium shadow-sm">
+                    <MapPin className="w-3 h-3 text-[#946E3A]" />
                     <span>{branch.city}, {branch.state}</span>
                   </div>
 
                   {/* Rating */}
-                  <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0b0c0e]/80 backdrop-blur-md border border-[#2d3038] text-[11px] text-[#c5a880]">
-                    <span className="font-semibold tabular-nums">{branch.rating.toFixed(2)}</span>
-                    <span className="text-[#736e65]">★</span>
+                  <div className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md border border-[#E8E2D8] text-[11px] text-[#946E3A] shadow-sm font-semibold">
+                    <span className="tabular-nums">{branch.rating.toFixed(2)}</span>
+                    <span>★</span>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 flex-1 flex flex-col justify-between">
+                <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between">
                   <div>
-                    <div className="text-[11px] uppercase tracking-widest text-[#827d74] font-medium mb-1">
+                    <div className="text-[11px] uppercase tracking-widest text-[#78716C] font-medium mb-1">
                       Sanctuary 0{idx + 1}
                     </div>
-                    <h3 className="font-serif-luxury text-2xl font-normal text-[#f7f3ec] group-hover:text-[#c5a880] transition-colors mb-2">
-                      {branch.name}
-                    </h3>
-                    <p className="text-xs text-[#a8a39a] leading-relaxed mb-4">
+                    <button
+                      onClick={() => onOpenBranchPage(branch)}
+                      className="text-left w-full cursor-pointer focus:outline-none"
+                    >
+                      <h3 className="font-serif-luxury text-2xl font-light text-[#1C1917] group-hover:text-[#946E3A] transition-colors mb-2 leading-snug">
+                        {branch.name}
+                      </h3>
+                    </button>
+                    <p className="text-xs text-[#57534E] leading-relaxed mb-5">
                       {branch.tagline}
                     </p>
 
                     {/* Signature Experiences */}
-                    <div className="pt-3 border-t border-[#1c1f26] mb-5">
-                      <div className="text-[10px] uppercase tracking-widest text-[#c5a880] font-medium mb-2 flex items-center gap-1">
+                    <div className="pt-3 border-t border-[#F2ECE3] mb-5">
+                      <div className="text-[10px] uppercase tracking-widest text-[#946E3A] font-semibold mb-2 flex items-center gap-1">
                         <Sparkles className="w-3 h-3" />
                         Signature Experiences
                       </div>
-                      <ul className="space-y-1.5 text-xs text-[#b8b3a8]">
-                        {branch.signatureExperiences.map((exp, i) => (
+                      <ul className="space-y-1.5 text-xs text-[#44403C]">
+                        {branch.signatureExperiences.slice(0, 3).map((exp, i) => (
                           <li key={i} className="flex items-start gap-2">
-                            <span className="text-[#c5a880] shrink-0">·</span>
+                            <span className="text-[#946E3A] shrink-0">·</span>
                             <span className="leading-snug">{exp}</span>
                           </li>
                         ))}
@@ -112,26 +125,27 @@ export const BranchesPanel: React.FC<BranchesPanelProps> = ({ onSelectBranchRoom
                     </div>
                   </div>
 
-                  {/* Contact & Branch Filter Action */}
-                  <div className="pt-4 border-t border-[#1c1f26] flex items-center justify-between gap-2">
-                    <div className="text-[11px] text-[#78736a] flex flex-col">
-                      <span className="flex items-center gap-1">
-                        <Phone className="w-3 h-3 text-[#c5a880]" />
-                        {branch.phone}
-                      </span>
-                    </div>
+                  {/* Dual Action: Explore Sanctuary Page & View Suites */}
+                  <div className="pt-4 border-t border-[#F2ECE3] flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => onOpenBranchPage(branch)}
+                      className="inline-flex items-center gap-1 text-xs text-[#946E3A] hover:text-[#6B4C20] font-medium transition-colors cursor-pointer"
+                    >
+                      <Compass className="w-3.5 h-3.5" />
+                      <span>Sanctuary Page</span>
+                    </button>
 
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.96 }}
                       onClick={() => {
                         setSelectedBranchId(branch.id);
                         onSelectBranchRooms(branch.id);
                       }}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#c5a880]/40 hover:border-[#c5a880] hover:bg-[#c5a880] hover:text-[#0b0c0e] text-xs uppercase tracking-wider text-[#e0ded8] transition-colors duration-200 font-medium cursor-pointer"
+                      className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-[#D8D0C5] hover:border-[#946E3A] hover:bg-[#FAF8F5] text-xs font-medium text-[#1C1917] transition-all cursor-pointer"
                     >
                       <span>View Suites</span>
-                      <ChevronRight className="w-3 h-3" />
+                      <ChevronRight className="w-3 h-3 text-[#946E3A]" />
                     </motion.button>
                   </div>
                 </div>

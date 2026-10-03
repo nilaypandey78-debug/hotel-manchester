@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll } from 'motion/react';
+import { ArrowUp } from 'lucide-react';
 import { HotelProvider, useHotel } from './context/HotelContext';
 import { WelcomeSplash } from './components/WelcomeSplash';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { BranchesPanel } from './components/BranchesPanel';
+import { BranchPageModal } from './components/BranchPageModal';
 import { RoomsGrid } from './components/RoomsGrid';
 import { ExperienceSection } from './components/ExperienceSection';
 import { BookingModal } from './components/BookingModal';
@@ -13,13 +15,22 @@ import { AdminPanel } from './components/AdminPanel';
 import { BottomPromoBanner } from './components/BottomPromoBanner';
 import { WhatsAppConcierge } from './components/WhatsAppConcierge';
 import { Footer } from './components/Footer';
-import { Room, Booking } from './types';
+import { Room, Booking, Branch } from './types';
 
 const MainAppContent: React.FC = () => {
   const { setSelectedBranchId, messages } = useHotel();
   const [activeView, setActiveView] = useState<'home' | 'dashboard' | 'admin'>('home');
   const [selectedRoomForBooking, setSelectedRoomForBooking] = useState<Room | null>(null);
+  const [selectedBranchForModal, setSelectedBranchForModal] = useState<Branch | null>(null);
   const [justConfirmedBookingCode, setJustConfirmedBookingCode] = useState<string | undefined>(undefined);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const { scrollY } = useScroll();
+
+  useEffect(() => {
+    return scrollY.on('change', (latest) => {
+      setShowScrollTop(latest > 380);
+    });
+  }, [scrollY]);
 
   // Calculate unread guest messages for admin badge
   const unreadGuestMessages = messages.filter((m) => m.sender === 'guest' && !m.read).length;
@@ -54,7 +65,7 @@ const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0c0e] text-[#ede8df] flex flex-col justify-between selection:bg-[#c5a880]/30 selection:text-[#f7f3ec]">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#292524] flex flex-col justify-between selection:bg-[#946E3A]/25 selection:text-[#1C1917]">
       {/* Top Bar Navigation */}
       <Navbar
         onOpenDashboard={() => setActiveView('dashboard')}
@@ -80,7 +91,10 @@ const MainAppContent: React.FC = () => {
                 onExploreClick={() => handleNavigateToSection('suites')}
               />
 
-              <BranchesPanel onSelectBranchRooms={handleSelectBranchRooms} />
+              <BranchesPanel
+                onSelectBranchRooms={handleSelectBranchRooms}
+                onOpenBranchPage={(branch) => setSelectedBranchForModal(branch)}
+              />
 
               <RoomsGrid onSelectRoom={(room) => setSelectedRoomForBooking(room)} />
 
@@ -123,6 +137,20 @@ const MainAppContent: React.FC = () => {
         </AnimatePresence>
       </main>
 
+      {/* Sanctuary Branch Dedicated Page Modal */}
+      <AnimatePresence>
+        {selectedBranchForModal && (
+          <BranchPageModal
+            branch={selectedBranchForModal}
+            onClose={() => setSelectedBranchForModal(null)}
+            onSelectRoom={(room) => {
+              setSelectedBranchForModal(null);
+              setSelectedRoomForBooking(room);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Booking Modal with Dynamic UPI QR Code & Animations */}
       <AnimatePresence>
         {selectedRoomForBooking && (
@@ -139,6 +167,25 @@ const MainAppContent: React.FC = () => {
 
       {/* Floating Luxury WhatsApp Concierge */}
       <WhatsAppConcierge />
+
+      {/* Floating Smooth Scroll-to-Top Indicator Button */}
+      <AnimatePresence>
+        {showScrollTop && activeView === 'home' && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 16 }}
+            whileHover={{ scale: 1.08, y: -2 }}
+            whileTap={{ scale: 0.94 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Scroll smoothly back to top"
+            className="fixed bottom-14 left-5 z-40 flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-white/95 backdrop-blur-md border border-[#D8D0C5] hover:border-[#946E3A] text-[#1C1917] hover:text-[#946E3A] shadow-[0_8px_25px_rgba(0,0,0,0.08)] transition-all cursor-pointer group"
+          >
+            <ArrowUp className="w-3.5 h-3.5 text-[#946E3A] group-hover:-translate-y-0.5 transition-transform" />
+            <span className="text-[11px] uppercase tracking-widest font-semibold">Top</span>
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -148,10 +195,30 @@ export default function App() {
 
   return (
     <HotelProvider>
-      {!welcomingCompleted && (
-        <WelcomeSplash onEnter={() => setWelcomingCompleted(true)} />
-      )}
-      <MainAppContent />
+      {/* Welcoming Splash Screen with Cinematic Exit Dissolve */}
+      <AnimatePresence>
+        {!welcomingCompleted && (
+          <WelcomeSplash onEnter={() => setWelcomingCompleted(true)} />
+        )}
+      </AnimatePresence>
+
+      {/* Main Sanctuary Website with Smooth Blooming Entry Animation */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.982, filter: 'blur(8px)', y: 18 }}
+        animate={
+          welcomingCompleted
+            ? { opacity: 1, scale: 1, filter: 'blur(0px)', y: 0 }
+            : { opacity: 0, scale: 0.982, filter: 'blur(8px)', y: 18 }
+        }
+        transition={{
+          duration: 1.35,
+          ease: [0.16, 1, 0.3, 1],
+          delay: 0.15,
+        }}
+        className="w-full min-h-screen"
+      >
+        <MainAppContent />
+      </motion.div>
     </HotelProvider>
   );
 }

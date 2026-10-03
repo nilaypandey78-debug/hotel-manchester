@@ -13,27 +13,27 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenAdmin,
   onOpenDashboard,
 }) => {
-  const { hotelContent, branches } = useHotel();
+  const { hotelContent, activeBranches } = useHotel();
 
   return (
-    <footer className="bg-[#060708] border-t border-[#1a1c22] text-[#8c877e] pt-16 pb-24">
+    <footer className="bg-[#F3EFE9] border-t border-[#DFD8CD] text-[#57534E] pt-16 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-16 border-b border-[#181a20]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-16 border-b border-[#E2DDD4]">
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
-            <span className="font-serif-luxury text-2xl font-light text-[#f7f3ec] tracking-wide block">
+            <span className="font-serif-luxury text-2xl font-light text-[#1C1917] tracking-wide block">
               Hotel Manchester
             </span>
-            <p className="text-xs text-[#9c968b] max-w-sm font-light leading-relaxed">
-              {hotelContent.welcomingHeadline}. Private sanctuaries across Udaipur, Goa, Shimla, Kerala, and Mumbai.
+            <p className="text-xs text-[#57534E] max-w-sm font-light leading-relaxed">
+              {hotelContent.welcomingHeadline}. Private sanctuaries across Udaipur, South Goa, Shimla, Kerala, and Mumbai.
             </p>
-            <div className="pt-2 text-xs space-y-1.5 text-[#a8a39a]">
+            <div className="pt-2 text-xs space-y-2 text-[#44403C]">
               <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-[#c5a880]" />
+                <Phone className="w-3.5 h-3.5 text-[#946E3A]" />
                 <span>{hotelContent.contactNumber}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-[#c5a880]" />
+                <Mail className="w-3.5 h-3.5 text-[#946E3A]" />
                 <span>{hotelContent.conciergeEmail}</span>
               </div>
             </div>
@@ -41,14 +41,14 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Navigation Links */}
           <div className="space-y-3">
-            <div className="text-[11px] uppercase tracking-widest text-[#f7f3ec] font-medium">
+            <div className="text-[11px] uppercase tracking-widest text-[#1C1917] font-semibold">
               Navigation
             </div>
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-2.5 text-xs">
               <li>
                 <button
                   onClick={() => onNavigateToSection('suites')}
-                  className="hover:text-[#c5a880] transition-colors cursor-pointer"
+                  className="hover:text-[#946E3A] transition-colors cursor-pointer"
                 >
                   Suites &amp; Villas
                 </button>
@@ -56,15 +56,15 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   onClick={() => onNavigateToSection('branches')}
-                  className="hover:text-[#c5a880] transition-colors cursor-pointer"
+                  className="hover:text-[#946E3A] transition-colors cursor-pointer"
                 >
-                  Nationwide Branches
+                  Sanctuary Estates
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => onNavigateToSection('experiences')}
-                  className="hover:text-[#c5a880] transition-colors cursor-pointer"
+                  className="hover:text-[#946E3A] transition-colors cursor-pointer"
                 >
                   Dining &amp; Ayurveda
                 </button>
@@ -72,7 +72,7 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button
                   onClick={onOpenDashboard}
-                  className="hover:text-[#c5a880] transition-colors cursor-pointer"
+                  className="hover:text-[#946E3A] transition-colors cursor-pointer"
                 >
                   Reservation Dashboard
                 </button>
@@ -82,15 +82,15 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Sanctuary Branches */}
           <div className="space-y-3">
-            <div className="text-[11px] uppercase tracking-widest text-[#f7f3ec] font-medium">
-              Sanctuaries
+            <div className="text-[11px] uppercase tracking-widest text-[#1C1917] font-semibold">
+              Active Sanctuaries
             </div>
-            <ul className="space-y-2 text-xs">
-              {branches.map((b) => (
+            <ul className="space-y-2.5 text-xs">
+              {activeBranches.map((b) => (
                 <li key={b.id}>
                   <button
                     onClick={() => onNavigateToSection('branches')}
-                    className="hover:text-[#c5a880] transition-colors cursor-pointer text-left"
+                    className="hover:text-[#946E3A] transition-colors cursor-pointer text-left"
                   >
                     {b.name}
                   </button>
@@ -101,20 +101,27 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Guest Services & Admin */}
           <div className="space-y-3">
-            <div className="text-[11px] uppercase tracking-widest text-[#f7f3ec] font-medium">
+            <div className="text-[11px] uppercase tracking-widest text-[#1C1917] font-semibold">
               Concierge Desk
             </div>
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-2.5 text-xs">
               <li>
-                <span className="text-[#a8a39a]">Instant UPI QR Gateway</span>
+                <span className="text-[#57534E]">Instant UPI QR Gateway</span>
               </li>
               <li>
-                <span className="text-[#a8a39a]">Direct WhatsApp Service</span>
+                <a
+                  href={`https://wa.me/${hotelContent.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#57534E] hover:text-[#18994f] transition-colors flex items-center gap-1.5"
+                >
+                  <span>WhatsApp: {hotelContent.whatsappNumber}</span>
+                </a>
               </li>
               <li>
                 <button
                   onClick={onOpenAdmin}
-                  className="text-[#c5a880] hover:underline cursor-pointer"
+                  className="text-[#946E3A] hover:underline cursor-pointer font-medium"
                 >
                   Admin &amp; Concierge Console
                 </button>
@@ -124,7 +131,7 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         {/* Bottom row */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#635f58] gap-4">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#78716C] gap-4">
           <div>
             © {new Date().getFullYear()} Hotel Manchester Luxury Resorts Ltd. All rights reserved.
           </div>

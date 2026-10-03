@@ -179,24 +179,24 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-3xl my-6 bg-[#0f1115] border border-[#262932] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-3xl my-6 bg-[#FAF8F5] border border-[#E2DBD0] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.2)] overflow-hidden flex flex-col max-h-[92vh]"
       >
         {/* Header */}
-        <div className="px-6 sm:px-8 py-5 border-b border-[#1e2129] flex items-center justify-between bg-[#12141a]">
+        <div className="px-6 sm:px-8 py-5 border-b border-[#EAE4DA] flex items-center justify-between bg-white">
           <div>
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[#c5a880] font-medium">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[#946E3A] font-semibold">
               <span>Hotel Manchester</span>
               <span aria-hidden="true">·</span>
               <span>Sanctuary Reservation</span>
             </div>
-            <h2 className="font-serif-luxury text-xl sm:text-2xl font-light text-[#f7f3ec]">
+            <h2 className="font-serif-luxury text-xl sm:text-2xl font-light text-[#1C1917]">
               {step === 4 ? 'Reservation Confirmed' : `Reserving: ${room.name}`}
             </h2>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-[#8c877e] hover:text-[#f7f3ec] hover:bg-[#1f222a] transition-colors"
+            className="p-2 rounded-full text-[#78716C] hover:text-[#1C1917] hover:bg-[#F3EFEA] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -204,17 +204,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
 
         {/* Progress Stepper (Except confirmation) */}
         {step < 4 && (
-          <div className="px-6 sm:px-8 py-3 bg-[#0d0e12] border-b border-[#1c1e26] flex items-center justify-between text-xs">
-            <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
-              <span className={`font-medium ${step >= 1 ? 'text-[#c5a880]' : 'text-[#5a564e]'}`}>
+          <div className="px-6 sm:px-8 py-3 bg-[#F5F0E8] border-b border-[#EAE4DA] flex items-center justify-between text-xs">
+            <div className="flex items-center gap-6 overflow-x-auto no-scrollbar font-medium">
+              <span className={step >= 1 ? 'text-[#946E3A] font-semibold' : 'text-[#78716C]'}>
                 1. Itinerary &amp; Add-ons
               </span>
-              <span className="text-[#33363f]">/</span>
-              <span className={`font-medium ${step >= 2 ? 'text-[#c5a880]' : 'text-[#5a564e]'}`}>
+              <span className="text-[#C4B9AA]">/</span>
+              <span className={step >= 2 ? 'text-[#946E3A] font-semibold' : 'text-[#78716C]'}>
                 2. Guest Details
               </span>
-              <span className="text-[#33363f]">/</span>
-              <span className={`font-medium ${step >= 3 ? 'text-[#c5a880]' : 'text-[#5a564e]'}`}>
+              <span className="text-[#C4B9AA]">/</span>
+              <span className={step >= 3 ? 'text-[#946E3A] font-semibold' : 'text-[#78716C]'}>
                 3. UPI QR Payment
               </span>
             </div>
@@ -227,19 +227,19 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
           {step === 1 && (
             <div className="space-y-6">
               {/* Room summary banner */}
-              <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl bg-[#14161c] border border-[#22252e]">
+              <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-white border border-[#EAE4DA] shadow-sm">
                 <img
                   src={resolveHotelImage(room.image)}
                   alt={room.name}
                   onError={(e) => {
                     e.currentTarget.src = ASSET_IMAGES.hero;
                   }}
-                  className="w-full sm:w-36 h-24 object-cover rounded-lg"
+                  className="w-full sm:w-36 h-24 object-cover rounded-xl"
                 />
                 <div className="flex-1">
-                  <h4 className="font-serif-luxury text-lg text-[#f7f3ec]">{room.name}</h4>
-                  <p className="text-xs text-[#9c968b]">{branch?.name} ({branch?.city})</p>
-                  <p className="text-xs text-[#c5a880] mt-2 font-mono">
+                  <h4 className="font-serif-luxury text-lg text-[#1C1917] font-medium">{room.name}</h4>
+                  <p className="text-xs text-[#78716C]">{branch?.name} ({branch?.city})</p>
+                  <p className="text-xs text-[#946E3A] mt-2 font-mono font-semibold">
                     ₹{room.pricePerNight.toLocaleString('en-IN')} / night
                   </p>
                 </div>
@@ -248,7 +248,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
               {/* Dates & Guests Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1.5 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1.5 font-semibold">
                     Check-In Date
                   </label>
                   <input
@@ -256,11 +256,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                     value={checkIn}
                     min={today}
                     onChange={(e) => setCheckIn(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1.5 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1.5 font-semibold">
                     Check-Out Date ({nights} {nights === 1 ? 'Night' : 'Nights'})
                   </label>
                   <input
@@ -268,36 +268,36 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                     value={checkOut}
                     min={checkIn}
                     onChange={(e) => setCheckOut(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1.5 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1.5 font-semibold">
                     Adult Guests
                   </label>
                   <select
                     value={adults}
                     onChange={(e) => setAdults(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   >
                     {[1, 2, 3, 4].map((n) => (
-                      <option key={n} value={n} className="bg-[#14161c]">
+                      <option key={n} value={n} className="bg-white">
                         {n} Adult{n > 1 ? 's' : ''}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1.5 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1.5 font-semibold">
                     Children
                   </label>
                   <select
                     value={children}
                     onChange={(e) => setChildren(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   >
                     {[0, 1, 2, 3].map((n) => (
-                      <option key={n} value={n} className="bg-[#14161c]">
+                      <option key={n} value={n} className="bg-white">
                         {n} Child{n !== 1 ? 'ren' : ''}
                       </option>
                     ))}
@@ -307,7 +307,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
 
               {/* Bespoke Luxury Add-ons */}
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#c5a880] mb-3 font-medium flex items-center gap-1.5">
+                <label className="block text-[11px] uppercase tracking-wider text-[#946E3A] mb-3 font-semibold flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" />
                   Tailored Sanctuary Add-ons
                 </label>
@@ -317,10 +317,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                     return (
                       <label
                         key={addOn.id}
-                        className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all duration-200 ${
+                        className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
                           isChecked
-                            ? 'bg-[#181a22] border-[#c5a880]/60'
-                            : 'bg-[#121419] border-[#22242c] hover:border-[#323642]'
+                            ? 'bg-white border-[#946E3A] shadow-sm'
+                            : 'bg-white/80 border-[#EAE4DA] hover:border-[#D8D0C5]'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -380,7 +380,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1 font-semibold">
                     Primary Guest Full Name *
                   </label>
                   <input
@@ -389,11 +389,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                     placeholder="e.g. Maharani / Dr. / Mr. Alexander Vance"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1 font-semibold">
                     Email Address (For Voucher &amp; Concierge) *
                   </label>
                   <input
@@ -402,11 +402,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                     placeholder="guest@resort.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1 font-semibold">
                     Phone / WhatsApp Number *
                   </label>
                   <input
@@ -415,42 +415,42 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                     placeholder="+91 98765 43210"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1 font-semibold">
                     Estimated Arrival Time
                   </label>
                   <select
                     value={arrivalTime}
                     onChange={(e) => setArrivalTime(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   >
-                    <option value="12:00">12:00 PM (Early Check-In Request)</option>
-                    <option value="14:00">02:00 PM (Standard Check-In)</option>
-                    <option value="16:00">04:00 PM</option>
-                    <option value="18:00">06:00 PM</option>
-                    <option value="20:00">08:00 PM or Later</option>
+                    <option value="12:00" className="bg-white">12:00 PM (Early Check-In Request)</option>
+                    <option value="14:00" className="bg-white">02:00 PM (Standard Check-In)</option>
+                    <option value="16:00" className="bg-white">04:00 PM</option>
+                    <option value="18:00" className="bg-white">06:00 PM</option>
+                    <option value="20:00" className="bg-white">08:00 PM or Later</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1 font-semibold">
                     Pillow &amp; Linen Preference
                   </label>
                   <select
                     value={pillowPref}
                     onChange={(e) => setPillowPref(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   >
-                    <option value="Hypoallergenic Goose Down">Hypoallergenic Goose Down</option>
-                    <option value="Organic Mulberry Silk">Organic Mulberry Silk</option>
-                    <option value="Contour Memory Foam">Contour Memory Foam</option>
-                    <option value="Buckwheat Ergonomic">Buckwheat Ergonomic</option>
+                    <option value="Hypoallergenic Goose Down" className="bg-white">Hypoallergenic Goose Down</option>
+                    <option value="Organic Mulberry Silk" className="bg-white">Organic Mulberry Silk</option>
+                    <option value="Contour Memory Foam" className="bg-white">Contour Memory Foam</option>
+                    <option value="Buckwheat Ergonomic" className="bg-white">Buckwheat Ergonomic</option>
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-[11px] uppercase tracking-wider text-[#8a857b] mb-1 font-medium">
+                  <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-1 font-semibold">
                     Special Inquiries, Dietary Preferences, or Occasions
                   </label>
                   <textarea
@@ -458,7 +458,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                     placeholder="e.g. Honeymoon, dietary allergies, quiet floor preference..."
                     value={specialRequests}
                     onChange={(e) => setSpecialRequests(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] focus:outline-none focus:border-[#c5a880]"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] focus:outline-none focus:border-[#946E3A]"
                   />
                 </div>
               </div>
@@ -469,20 +469,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
           {step === 3 && (
             <div className="space-y-6 text-center">
               <div className="max-w-md mx-auto">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1b1712] border border-[#c5a880]/30 text-xs text-[#c5a880] mb-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FAF5EC] border border-[#E8DCC8] text-xs text-[#946E3A] font-semibold mb-3">
                   <Clock className="w-3.5 h-3.5" />
                   <span>Awaiting Payment Verification · {formatTimer(timerSeconds)}</span>
                 </div>
-                <h3 className="font-serif-luxury text-2xl text-[#f7f3ec] mb-1">
+                <h3 className="font-serif-luxury text-2xl text-[#1C1917] mb-1 font-medium">
                   Scan to Complete UPI Payment
                 </h3>
-                <p className="text-xs text-[#a8a39a]">
+                <p className="text-xs text-[#57534E]">
                   Scan using Google Pay, PhonePe, Paytm, BHIM, or any UPI app.
                 </p>
               </div>
 
               {/* Dynamic QR Code Card */}
-              <div className="max-w-xs mx-auto p-4 rounded-2xl bg-[#fdfbf7] text-[#0c0d0e] shadow-2xl flex flex-col items-center">
+              <div className="max-w-xs mx-auto p-5 rounded-3xl bg-white border border-[#E2DBD0] text-[#1C1917] shadow-lg flex flex-col items-center">
                 {upiQrDataUrl ? (
                   <img
                     src={upiQrDataUrl}
@@ -495,33 +495,33 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   </div>
                 )}
 
-                <div className="mt-2 text-center">
-                  <div className="text-[10px] uppercase tracking-widest text-[#736e65]">
+                <div className="mt-3 text-center">
+                  <div className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
                     Amount Payable
                   </div>
-                  <div className="font-serif-luxury text-2xl font-bold text-[#0c0d0e]">
+                  <div className="font-serif-luxury text-3xl font-bold text-[#946E3A]">
                     ₹{totalAmount.toLocaleString('en-IN')}
                   </div>
-                  <div className="text-[11px] text-[#6b665c] mt-0.5 font-mono">
+                  <div className="text-[11px] text-[#78716C] mt-0.5 font-mono">
                     Ref: {tempCode}
                   </div>
                 </div>
               </div>
 
               {/* UPI ID Copy Box */}
-              <div className="max-w-md mx-auto flex items-center justify-between p-3 rounded-xl bg-[#14161c] border border-[#272a33]">
+              <div className="max-w-md mx-auto flex items-center justify-between p-3.5 rounded-2xl bg-white border border-[#EAE4DA] shadow-sm">
                 <div className="text-left">
-                  <div className="text-[10px] uppercase tracking-widest text-[#827d74]">
+                  <div className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
                     Official Sanctuary UPI VPA
                   </div>
-                  <div className="text-xs sm:text-sm font-mono text-[#f7f3ec]">
+                  <div className="text-xs sm:text-sm font-mono text-[#1C1917] font-semibold">
                     {hotelContent.upiVpa}
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyVpa}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#22252f] hover:bg-[#2e323e] text-xs text-[#c5a880] transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FAF8F5] hover:bg-[#F0EAE1] text-xs text-[#946E3A] font-semibold border border-[#EAE4DA] transition-colors cursor-pointer"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   <span>{copiedVpa ? 'Copied!' : 'Copy UPI'}</span>
@@ -530,7 +530,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
 
               {/* UTR Input Form */}
               <div className="max-w-md mx-auto text-left pt-2">
-                <label className="block text-[11px] uppercase tracking-wider text-[#c5a880] mb-1.5 font-medium">
+                <label className="block text-[11px] uppercase tracking-wider text-[#946E3A] mb-1.5 font-semibold">
                   Enter 12-Digit UPI Transaction UTR / Ref Number *
                 </label>
                 <input
@@ -539,9 +539,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   placeholder="e.g. 428819003411"
                   value={upiUtr}
                   onChange={(e) => setUpiUtr(e.target.value.replace(/[^0-9a-zA-Z]/g, ''))}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#14161c] border border-[#272a33] text-sm text-[#f7f3ec] font-mono tracking-wider focus:outline-none focus:border-[#c5a880]"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] font-mono tracking-wider focus:outline-none focus:border-[#946E3A]"
                 />
-                <p className="text-[11px] text-[#857f75] mt-1.5">
+                <p className="text-[11px] text-[#78716C] mt-1.5">
                   Found in your UPI app payment receipt under "UPI Ref ID" or "UTR". Concierge will instantly cross-verify your booking.
                 </p>
               </div>
@@ -552,37 +552,37 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
           {step === 4 && confirmedBooking && (
             <div className="space-y-6">
               <div className="text-center py-4">
-                <div className="w-14 h-14 rounded-full bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center mx-auto mb-4 text-emerald-400">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-300 flex items-center justify-center mx-auto mb-4 text-emerald-600 shadow-sm">
                   <Check className="w-7 h-7" />
                 </div>
-                <div className="text-[11px] uppercase tracking-[0.25em] text-[#c5a880] font-medium mb-1">
+                <div className="text-[11px] uppercase tracking-[0.25em] text-[#946E3A] font-semibold mb-1">
                   Sanctuary Itinerary Secured
                 </div>
-                <h3 className="font-serif-luxury text-3xl font-light text-[#f7f3ec]">
+                <h3 className="font-serif-luxury text-3xl font-light text-[#1C1917]">
                   Welcome to Hotel Manchester
                 </h3>
-                <p className="text-xs text-[#9c968b] max-w-md mx-auto mt-2">
+                <p className="text-xs text-[#57534E] max-w-md mx-auto mt-2">
                   A personalized booking confirmation voucher has been generated and dispatched to{' '}
-                  <span className="text-[#f7f3ec]">{confirmedBooking.guestDetails.email}</span>.
+                  <span className="text-[#1C1917] font-medium">{confirmedBooking.guestDetails.email}</span>.
                 </p>
               </div>
 
-              {/* Luxury Boarding Pass Card */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-[#15171e] to-[#0f1116] border border-[#c5a880]/30 shadow-xl space-y-4">
-                <div className="flex items-center justify-between pb-4 border-b border-[#242833]">
+              {/* Luxury Boarding Pass Card in White Porcelain with Antique Gold Accents */}
+              <div className="p-6 rounded-3xl bg-white border border-[#E2DBD0] shadow-md space-y-4">
+                <div className="flex items-center justify-between pb-4 border-b border-[#F0EAE1]">
                   <div>
-                    <span className="text-[10px] uppercase tracking-widest text-[#827d74]">
+                    <span className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
                       Booking Reference Code
                     </span>
-                    <div className="font-serif-luxury text-2xl text-[#c5a880] font-normal tracking-wider">
+                    <div className="font-serif-luxury text-2xl text-[#946E3A] font-medium tracking-wider">
                       {confirmedBooking.bookingCode}
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] uppercase tracking-widest text-[#827d74]">
+                    <span className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
                       Payment Status
                     </span>
-                    <div className="text-xs font-medium text-emerald-400">
+                    <div className="text-xs font-semibold text-emerald-700">
                       {confirmedBooking.paymentStatus === 'verified'
                         ? '✓ Verified & Room Reserved'
                         : 'Awaiting Concierge Verification'}
@@ -592,46 +592,46 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
                   <div>
-                    <span className="text-[#827d74] block text-[10px] uppercase tracking-wider">
+                    <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
                       Sanctuary
                     </span>
-                    <span className="text-[#ede8df] font-medium">{confirmedBooking.branchName}</span>
+                    <span className="text-[#1C1917] font-medium">{confirmedBooking.branchName}</span>
                   </div>
                   <div>
-                    <span className="text-[#827d74] block text-[10px] uppercase tracking-wider">
+                    <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
                       Suite
                     </span>
-                    <span className="text-[#ede8df] font-medium">{confirmedBooking.roomName}</span>
+                    <span className="text-[#1C1917] font-medium">{confirmedBooking.roomName}</span>
                   </div>
                   <div>
-                    <span className="text-[#827d74] block text-[10px] uppercase tracking-wider">
+                    <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
                       Dates
                     </span>
-                    <span className="text-[#ede8df] font-mono">
+                    <span className="text-[#1C1917] font-mono">
                       {confirmedBooking.checkInDate} to {confirmedBooking.checkOutDate} ({confirmedBooking.nights}n)
                     </span>
                   </div>
                   <div>
-                    <span className="text-[#827d74] block text-[10px] uppercase tracking-wider">
+                    <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
                       Primary Guest
                     </span>
-                    <span className="text-[#ede8df] font-medium">
+                    <span className="text-[#1C1917] font-medium">
                       {confirmedBooking.guestDetails.fullName}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[#827d74] block text-[10px] uppercase tracking-wider">
+                    <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
                       UTR Reference
                     </span>
-                    <span className="text-[#c5a880] font-mono">
+                    <span className="text-[#946E3A] font-mono font-medium">
                       {confirmedBooking.guestDetails.upiUtr || 'Pending'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[#827d74] block text-[10px] uppercase tracking-wider">
+                    <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
                       Total Tariff
                     </span>
-                    <span className="text-[#c5a880] font-serif-luxury text-base font-semibold">
+                    <span className="text-[#946E3A] font-serif-luxury text-base font-semibold">
                       ₹{confirmedBooking.totalAmount.toLocaleString('en-IN')}
                     </span>
                   </div>
@@ -642,15 +642,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
         </div>
 
         {/* Footer / Summary Action Bar */}
-        <div className="px-6 sm:px-8 py-4 bg-[#12141a] border-t border-[#1e2129] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="px-6 sm:px-8 py-4 bg-white border-t border-[#EAE4DA] flex flex-col sm:flex-row items-center justify-between gap-4">
           {step < 4 ? (
             <>
               {/* Cost calculation preview */}
               <div className="text-left w-full sm:w-auto">
-                <div className="text-[10px] uppercase tracking-widest text-[#827d74]">
+                <div className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
                   Total ({nights} {nights === 1 ? 'Night' : 'Nights'} incl. Taxes)
                 </div>
-                <div className="font-serif-luxury text-2xl text-[#c5a880] font-normal">
+                <div className="font-serif-luxury text-2xl text-[#946E3A] font-semibold">
                   ₹{totalAmount.toLocaleString('en-IN')}
                 </div>
               </div>
@@ -661,7 +661,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   <button
                     type="button"
                     onClick={() => setStep((prev) => (prev - 1) as 1 | 2 | 3)}
-                    className="px-5 py-2.5 rounded-full border border-[#272a33] text-xs uppercase tracking-wider text-[#a8a39a] hover:text-[#f7f3ec] transition-colors"
+                    className="px-5 py-2.5 rounded-full border border-[#D8D0C5] text-xs uppercase tracking-wider text-[#57534E] hover:text-[#1C1917] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
                   >
                     Back
                   </button>
@@ -671,7 +671,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="px-7 py-2.5 rounded-full bg-[#c5a880] hover:bg-[#d8be96] text-[#0b0c0e] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md flex items-center gap-2 cursor-pointer"
+                    className="px-7 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#946E3A] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md flex items-center gap-2 cursor-pointer"
                   >
                     <span>Guest Details</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -685,8 +685,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                     onClick={() => setStep(3)}
                     className={`px-7 py-2.5 rounded-full text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md flex items-center gap-2 ${
                       fullName.trim() && email.trim() && phone.trim()
-                        ? 'bg-[#c5a880] hover:bg-[#d8be96] text-[#0b0c0e] cursor-pointer'
-                        : 'bg-[#22252e] text-[#5c5952] cursor-not-allowed'
+                        ? 'bg-[#1C1917] hover:bg-[#946E3A] text-white cursor-pointer'
+                        : 'bg-[#EAE4DA] text-[#A8A29E] cursor-not-allowed'
                     }`}
                   >
                     <span>Proceed to UPI QR</span>
@@ -698,7 +698,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   <button
                     type="button"
                     onClick={handleFinalSubmit}
-                    className="px-7 py-2.5 rounded-full bg-[#c5a880] hover:bg-[#d8be96] text-[#0b0c0e] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md flex items-center gap-2 cursor-pointer"
+                    className="px-7 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#946E3A] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md flex items-center gap-2 cursor-pointer"
                   >
                     <span>I Have Paid · Confirm Booking</span>
                     <Check className="w-3.5 h-3.5" />
@@ -711,9 +711,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#2d313d] hover:border-[#c5a880] text-xs text-[#f7f3ec] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#D8D0C5] hover:border-[#946E3A] text-xs text-[#1C1917] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5 text-[#c5a880]" />
+                <Download className="w-3.5 h-3.5 text-[#946E3A]" />
                 <span>Print Luxury Pass</span>
               </button>
 
@@ -723,7 +723,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   if (confirmedBooking) onBookingConfirmed(confirmedBooking);
                   onClose();
                 }}
-                className="px-7 py-2.5 rounded-full bg-[#c5a880] hover:bg-[#d8be96] text-[#0b0c0e] text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md cursor-pointer"
+                className="px-7 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#946E3A] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md cursor-pointer"
               >
                 Track in Dashboard
               </button>
