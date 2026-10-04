@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import QRCode from 'qrcode';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -13,7 +13,12 @@ import {
   ShieldCheck,
   Download,
   AlertCircle,
-  QrCode as QrIcon
+  QrCode as QrIcon,
+  Smartphone,
+  CheckCircle2,
+  Wallet,
+  ExternalLink,
+  Coins
 } from 'lucide-react';
 import { useHotel } from '../context/HotelContext';
 import { Room, Booking } from '../types';
@@ -59,10 +64,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
   const [pillowPref, setPillowPref] = useState('Hypoallergenic Goose Down');
   const [specialRequests, setSpecialRequests] = useState('');
 
-  // UPI Payment State
+  // Amount QR Payment System State
+  const [paymentMode, setPaymentMode] = useState<'advance_25' | 'full' | 'advance_50' | 'custom'>('advance_25');
+  const [customDepositAmount, setCustomDepositAmount] = useState<number>(0);
   const [upiQrDataUrl, setUpiQrDataUrl] = useState<string>('');
   const [upiUtr, setUpiUtr] = useState('');
   const [copiedVpa, setCopiedVpa] = useState(false);
+  const [copiedAmount, setCopiedAmount] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(600); // 10 minutes
   const [tempCode] = useState(() => `HM-${Math.floor(1000 + Math.random() * 9000)}`);
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
@@ -87,23 +95,36 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
   const taxAmount = Math.round((subtotal - discountAmount) * 0.12); // 12% luxury hospitality tax
   const totalAmount = subtotal - discountAmount + taxAmount;
 
-  // Generate UPI QR Code dynamically whenever total amount changes
+  // Dynamic Amount QR Calculation
+  const payableAmount = useMemo(() => {
+    if (paymentMode === 'full') return totalAmount;
+    if (paymentMode === 'advance_25') return Math.max(100, Math.round(totalAmount * 0.25));
+    if (paymentMode === 'advance_50') return Math.max(100, Math.round(totalAmount * 0.50));
+    if (paymentMode === 'custom') {
+      return Math.min(totalAmount, Math.max(500, customDepositAmount || Math.round(totalAmount * 0.25)));
+    }
+    return totalAmount;
+  }, [paymentMode, totalAmount, customDepositAmount]);
+
+  const remainingBalance = Math.max(0, totalAmount - payableAmount);
+
+  // Generate UPI QR Code dynamically whenever payable amount changes
   useEffect(() => {
     const upiUri = `upi://pay?pa=${hotelContent.upiVpa}&pn=${encodeURIComponent(
       hotelContent.upiPayeeName
-    )}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent(`Resort Reservation ${tempCode}`)}`;
+    )}&am=${payableAmount}&cu=INR&tn=${encodeURIComponent(`Sanctuary Reservation ${tempCode}`)}`;
 
     QRCode.toDataURL(upiUri, {
       width: 280,
       margin: 2,
       color: {
-        dark: '#0c0d0e',
-        light: '#fdfbf7',
+        dark: '#1C1917',
+        light: '#FAF8F5',
       },
     })
       .then((url) => setUpiQrDataUrl(url))
       .catch((err) => console.error('QR code generation failed', err));
-  }, [totalAmount, hotelContent, tempCode]);
+  }, [payableAmount, hotelContent, tempCode]);
 
   // Payment Countdown Timer
   useEffect(() => {
@@ -153,6 +174,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
         pillowPreference: pillowPref,
       },
       totalAmount,
+      paidAmount: payableAmount,
+      paymentType: paymentMode === 'full' ? 'full' : 'advance_deposit',
       paymentStatus: upiUtr.trim().length >= 8 ? 'verified' : 'pending_upi',
       addOns: selectedAddOns.map((id) => LUXURY_ADD_ONS.find((a) => a.id === id)?.name || id),
     });
@@ -465,84 +488,290 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
             </div>
           )}
 
-          {/* STEP 3: UPI Payment with Dynamic QR Code */}
+          {/* STEP 3: UPI Payment with Dynamic Amount QR Code System */}
           {step === 3 && (
             <div className="space-y-6 text-center">
-              <div className="max-w-md mx-auto">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FAF5EC] border border-[#E8DCC8] text-xs text-[#946E3A] font-semibold mb-3">
+              <div className="max-w-xl mx-auto">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FAF5EC] border border-[#E8DCC8] text-xs text-[#946E3A] font-semibold mb-2">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>Awaiting Payment Verification · {formatTimer(timerSeconds)}</span>
+                  <span>Awaiting Instant Payment Verification · {formatTimer(timerSeconds)}</span>
                 </div>
-                <h3 className="font-serif-luxury text-2xl text-[#1C1917] mb-1 font-medium">
-                  Scan to Complete UPI Payment
+                <h3 className="font-serif-luxury text-2xl sm:text-3xl text-[#1C1917] mb-1 font-medium">
+                  Dynamic UPI Amount QR System
                 </h3>
-                <p className="text-xs text-[#57534E]">
-                  Scan using Google Pay, PhonePe, Paytm, BHIM, or any UPI app.
+                <p className="text-xs text-[#57534E] leading-relaxed">
+                  Choose your payable amount below. The QR code dynamically encodes your chosen deposit. Scan directly with any UPI App.
                 </p>
               </div>
 
-              {/* Dynamic QR Code Card */}
-              <div className="max-w-xs mx-auto p-5 rounded-3xl bg-white border border-[#E2DBD0] text-[#1C1917] shadow-lg flex flex-col items-center">
-                {upiQrDataUrl ? (
-                  <img
-                    src={upiQrDataUrl}
-                    alt="UPI Payment QR Code"
-                    className="w-56 h-56 object-contain"
-                  />
-                ) : (
-                  <div className="w-56 h-56 flex items-center justify-center bg-neutral-100 rounded-lg">
-                    <QrIcon className="w-12 h-12 text-neutral-400 animate-pulse" />
-                  </div>
-                )}
-
-                <div className="mt-3 text-center">
-                  <div className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
-                    Amount Payable
-                  </div>
-                  <div className="font-serif-luxury text-3xl font-bold text-[#946E3A]">
-                    ₹{totalAmount.toLocaleString('en-IN')}
-                  </div>
-                  <div className="text-[11px] text-[#78716C] mt-0.5 font-mono">
-                    Ref: {tempCode}
-                  </div>
-                </div>
-              </div>
-
-              {/* UPI ID Copy Box */}
-              <div className="max-w-md mx-auto flex items-center justify-between p-3.5 rounded-2xl bg-white border border-[#EAE4DA] shadow-sm">
-                <div className="text-left">
-                  <div className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
-                    Official Sanctuary UPI VPA
-                  </div>
-                  <div className="text-xs sm:text-sm font-mono text-[#1C1917] font-semibold">
-                    {hotelContent.upiVpa}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCopyVpa}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FAF8F5] hover:bg-[#F0EAE1] text-xs text-[#946E3A] font-semibold border border-[#EAE4DA] transition-colors cursor-pointer"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{copiedVpa ? 'Copied!' : 'Copy UPI'}</span>
-                </button>
-              </div>
-
-              {/* UTR Input Form */}
-              <div className="max-w-md mx-auto text-left pt-2">
-                <label className="block text-[11px] uppercase tracking-wider text-[#946E3A] mb-1.5 font-semibold">
-                  Enter 12-Digit UPI Transaction UTR / Ref Number *
+              {/* Amount Selection Options (Amount QR System) */}
+              <div className="max-w-xl mx-auto text-left">
+                <label className="block text-[11px] uppercase tracking-wider text-[#78716C] mb-2 font-semibold">
+                  Select Payable Deposit Amount
                 </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {/* 25% Advance Token Guarantee */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMode('advance_25')}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative ${
+                      paymentMode === 'advance_25'
+                        ? 'bg-[#FAF5EC] border-[#946E3A] shadow-sm ring-1 ring-[#946E3A]'
+                        : 'bg-white border-[#EAE4DA] hover:border-[#946E3A]/60'
+                    }`}
+                  >
+                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[#946E3A] text-white font-bold inline-block mb-1">
+                      Token
+                    </span>
+                    <span className="text-xs font-semibold text-[#1C1917] block">25% Advance</span>
+                    <span className="font-serif-luxury text-base sm:text-lg font-bold text-[#946E3A] block mt-1">
+                      ₹{Math.max(100, Math.round(totalAmount * 0.25)).toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[10px] text-[#78716C] block mt-0.5">
+                      Bal ₹{(totalAmount - Math.round(totalAmount * 0.25)).toLocaleString('en-IN')} at check-in
+                    </span>
+                  </button>
+
+                  {/* 50% Mid-Deposit */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMode('advance_50')}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                      paymentMode === 'advance_50'
+                        ? 'bg-[#FAF5EC] border-[#946E3A] shadow-sm ring-1 ring-[#946E3A]'
+                        : 'bg-white border-[#EAE4DA] hover:border-[#946E3A]/60'
+                    }`}
+                  >
+                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[#78716C] text-white font-bold inline-block mb-1">
+                      Deposit
+                    </span>
+                    <span className="text-xs font-semibold text-[#1C1917] block">50% Deposit</span>
+                    <span className="font-serif-luxury text-base sm:text-lg font-bold text-[#946E3A] block mt-1">
+                      ₹{Math.max(100, Math.round(totalAmount * 0.50)).toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[10px] text-[#78716C] block mt-0.5">
+                      Bal ₹{(totalAmount - Math.round(totalAmount * 0.50)).toLocaleString('en-IN')} at check-in
+                    </span>
+                  </button>
+
+                  {/* 100% Full Pre-Payment */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMode('full')}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                      paymentMode === 'full'
+                        ? 'bg-[#FAF5EC] border-[#946E3A] shadow-sm ring-1 ring-[#946E3A]'
+                        : 'bg-white border-[#EAE4DA] hover:border-[#946E3A]/60'
+                    }`}
+                  >
+                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-700 text-white font-bold inline-block mb-1">
+                      Full
+                    </span>
+                    <span className="text-xs font-semibold text-[#1C1917] block">100% Full</span>
+                    <span className="font-serif-luxury text-base sm:text-lg font-bold text-[#946E3A] block mt-1">
+                      ₹{totalAmount.toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[10px] text-emerald-700 block mt-0.5 font-medium">
+                      Zero due upon arrival
+                    </span>
+                  </button>
+
+                  {/* Custom Deposit Amount */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMode('custom');
+                      if (!customDepositAmount) {
+                        setCustomDepositAmount(Math.round(totalAmount * 0.35));
+                      }
+                    }}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                      paymentMode === 'custom'
+                        ? 'bg-[#FAF5EC] border-[#946E3A] shadow-sm ring-1 ring-[#946E3A]'
+                        : 'bg-white border-[#EAE4DA] hover:border-[#946E3A]/60'
+                    }`}
+                  >
+                    <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[#1C1917] text-white font-bold inline-block mb-1">
+                      Custom
+                    </span>
+                    <span className="text-xs font-semibold text-[#1C1917] block">Custom ₹</span>
+                    <span className="font-serif-luxury text-base sm:text-lg font-bold text-[#946E3A] block mt-1">
+                      ₹{(customDepositAmount || Math.round(totalAmount * 0.35)).toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[10px] text-[#78716C] block mt-0.5">
+                      Choose any amount
+                    </span>
+                  </button>
+                </div>
+
+                {/* Custom Amount Input Bar */}
+                {paymentMode === 'custom' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-3 p-3.5 rounded-2xl bg-white border border-[#946E3A]/40 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  >
+                    <div>
+                      <label className="text-[11px] font-semibold text-[#1C1917] uppercase tracking-wider block">
+                        Enter Custom Deposit Amount (₹)
+                      </label>
+                      <span className="text-[10px] text-[#78716C]">
+                        Min ₹500 · Max ₹{totalAmount.toLocaleString('en-IN')} (Full amount)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-serif-luxury text-lg text-[#946E3A] font-bold">₹</span>
+                      <input
+                        type="number"
+                        min={500}
+                        max={totalAmount}
+                        step={500}
+                        value={customDepositAmount || ''}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setCustomDepositAmount(Math.min(totalAmount, Math.max(0, val)));
+                        }}
+                        placeholder="e.g. 20000"
+                        className="w-36 px-3 py-1.5 rounded-xl border border-[#D8D0C5] text-sm font-mono font-bold text-[#1C1917] focus:border-[#946E3A] focus:outline-none"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Dynamic QR Code Card with Amount Encoding */}
+              <div className="max-w-sm mx-auto p-6 rounded-3xl bg-white border-2 border-[#946E3A]/30 text-[#1C1917] shadow-xl flex flex-col items-center relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#946E3A] via-[#C5A869] to-[#946E3A]" />
+
+                <div className="text-[11px] uppercase tracking-widest text-[#78716C] font-semibold mb-2 flex items-center gap-1.5">
+                  <QrIcon className="w-3.5 h-3.5 text-[#946E3A]" />
+                  <span>Amount Encoded in QR Code</span>
+                </div>
+
+                <div className="font-serif-luxury text-3xl sm:text-4xl font-bold text-[#946E3A] mb-1">
+                  ₹{payableAmount.toLocaleString('en-IN')}
+                </div>
+
+                <div className="text-xs text-[#57534E] mb-3">
+                  {paymentMode === 'full' ? (
+                    <span className="text-emerald-700 font-medium">✓ Full Suite Tariff Pre-Paid</span>
+                  ) : (
+                    <span>
+                      Token Deposit · Balance <strong className="text-[#1C1917]">₹{remainingBalance.toLocaleString('en-IN')}</strong> upon arrival
+                    </span>
+                  )}
+                </div>
+
+                {/* QR Image */}
+                <div className="p-3 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DA] shadow-inner mb-3">
+                  {upiQrDataUrl ? (
+                    <img
+                      src={upiQrDataUrl}
+                      alt="UPI Payment QR Code"
+                      className="w-52 h-52 object-contain"
+                    />
+                  ) : (
+                    <div className="w-52 h-52 flex items-center justify-center bg-neutral-100 rounded-lg">
+                      <QrIcon className="w-12 h-12 text-neutral-400 animate-pulse" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Supported Apps Logos */}
+                <div className="flex items-center justify-center gap-2 text-[10px] text-[#78716C] font-medium pt-1 border-t border-[#F2ECE3] w-full">
+                  <span>Supported Apps:</span>
+                  <span className="px-1.5 py-0.5 rounded bg-[#FAF8F5] border text-[#1C1917] font-semibold">GPay</span>
+                  <span className="px-1.5 py-0.5 rounded bg-[#FAF8F5] border text-[#1C1917] font-semibold">PhonePe</span>
+                  <span className="px-1.5 py-0.5 rounded bg-[#FAF8F5] border text-[#1C1917] font-semibold">Paytm</span>
+                  <span className="px-1.5 py-0.5 rounded bg-[#FAF8F5] border text-[#1C1917] font-semibold">BHIM</span>
+                  <span className="px-1.5 py-0.5 rounded bg-[#FAF8F5] border text-[#1C1917] font-semibold">CRED</span>
+                </div>
+
+                {/* Mobile Direct UPI Intent Link Button */}
+                <a
+                  href={`upi://pay?pa=${hotelContent.upiVpa}&pn=${encodeURIComponent(
+                    hotelContent.upiPayeeName
+                  )}&am=${payableAmount}&cu=INR&tn=${encodeURIComponent(`Reservation ${tempCode}`)}`}
+                  className="mt-4 w-full py-2.5 rounded-xl bg-[#1C1917] hover:bg-[#946E3A] text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-[#C5A869]" />
+                  <span>Tap to Pay in Any UPI App</span>
+                  <ExternalLink className="w-3 h-3 text-[#C5A869]" />
+                </a>
+              </div>
+
+              {/* UPI ID & Amount Quick Copy Box */}
+              <div className="max-w-md mx-auto grid grid-cols-2 gap-3 text-left">
+                <div className="p-3 rounded-2xl bg-white border border-[#EAE4DA] shadow-sm flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#78716C] block font-semibold">
+                      Sanctuary UPI VPA
+                    </span>
+                    <span className="text-xs font-mono font-bold text-[#1C1917] truncate block mt-0.5">
+                      {hotelContent.upiVpa}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyVpa}
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] text-[#946E3A] hover:text-[#6B4C20] font-semibold cursor-pointer"
+                  >
+                    <Copy className="w-3 h-3" />
+                    <span>{copiedVpa ? 'Copied VPA!' : 'Copy VPA'}</span>
+                  </button>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-white border border-[#EAE4DA] shadow-sm flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#78716C] block font-semibold">
+                      Exact Amount
+                    </span>
+                    <span className="text-xs font-mono font-bold text-[#946E3A] block mt-0.5">
+                      ₹{payableAmount.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(payableAmount.toString());
+                      setCopiedAmount(true);
+                      setTimeout(() => setCopiedAmount(false), 2000);
+                    }}
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] text-[#946E3A] hover:text-[#6B4C20] font-semibold cursor-pointer"
+                  >
+                    <Copy className="w-3 h-3" />
+                    <span>{copiedAmount ? 'Copied Amount!' : 'Copy Amount'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* UTR Input Form with Simulation Test Helper */}
+              <div className="max-w-md mx-auto text-left pt-1 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] uppercase tracking-wider text-[#946E3A] font-semibold">
+                    12-Digit UPI UTR / Transaction ID *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sampleUtr = `${Math.floor(100000000000 + Math.random() * 900000000000)}`;
+                      setUpiUtr(sampleUtr);
+                    }}
+                    className="text-[10px] text-[#946E3A] hover:text-[#6B4C20] underline font-medium cursor-pointer"
+                  >
+                    Simulate Successful UPI UTR
+                  </button>
+                </div>
                 <input
                   type="text"
                   maxLength={16}
                   placeholder="e.g. 428819003411"
                   value={upiUtr}
                   onChange={(e) => setUpiUtr(e.target.value.replace(/[^0-9a-zA-Z]/g, ''))}
-                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] font-mono tracking-wider focus:outline-none focus:border-[#946E3A]"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#D8D0C5] text-sm text-[#1C1917] font-mono tracking-wider focus:outline-none focus:border-[#946E3A] shadow-inner"
                 />
-                <p className="text-[11px] text-[#78716C] mt-1.5">
-                  Found in your UPI app payment receipt under "UPI Ref ID" or "UTR". Concierge will instantly cross-verify your booking.
+                <p className="text-[11px] text-[#78716C] leading-normal">
+                  Found on your payment screen under <strong>UPI Ref ID / UTR</strong>. Our concierge desk verifies in real-time.
                 </p>
               </div>
             </div>
@@ -556,7 +785,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   <Check className="w-7 h-7" />
                 </div>
                 <div className="text-[11px] uppercase tracking-[0.25em] text-[#946E3A] font-semibold mb-1">
-                  Sanctuary Itinerary Secured
+                  Sanctuary Itinerary Secured via Amount QR
                 </div>
                 <h3 className="font-serif-luxury text-3xl font-light text-[#1C1917]">
                   Welcome to Hotel Manchester
@@ -568,7 +797,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
               </div>
 
               {/* Luxury Boarding Pass Card in White Porcelain with Antique Gold Accents */}
-              <div className="p-6 rounded-3xl bg-white border border-[#E2DBD0] shadow-md space-y-4">
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border-2 border-[#946E3A]/40 shadow-xl space-y-5 text-left relative">
                 <div className="flex items-center justify-between pb-4 border-b border-[#F0EAE1]">
                   <div>
                     <span className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
@@ -590,18 +819,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                   <div>
                     <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
                       Sanctuary
                     </span>
                     <span className="text-[#1C1917] font-medium">{confirmedBooking.branchName}</span>
-                  </div>
-                  <div>
-                    <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
-                      Suite
-                    </span>
-                    <span className="text-[#1C1917] font-medium">{confirmedBooking.roomName}</span>
                   </div>
                   <div>
                     <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
@@ -613,26 +836,18 @@ export const BookingModal: React.FC<BookingModalProps> = ({ room, onClose, onBoo
                   </div>
                   <div>
                     <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
-                      Primary Guest
+                      Deposit Paid via QR
                     </span>
-                    <span className="text-[#1C1917] font-medium">
-                      {confirmedBooking.guestDetails.fullName}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
-                      UTR Reference
-                    </span>
-                    <span className="text-[#946E3A] font-mono font-medium">
-                      {confirmedBooking.guestDetails.upiUtr || 'Pending'}
+                    <span className="text-emerald-700 font-mono font-bold text-sm">
+                      ₹{(confirmedBooking.paidAmount || payableAmount).toLocaleString('en-IN')}
                     </span>
                   </div>
                   <div>
                     <span className="text-[#78716C] block text-[10px] uppercase tracking-wider font-medium">
-                      Total Tariff
+                      Balance at Check-in
                     </span>
-                    <span className="text-[#946E3A] font-serif-luxury text-base font-semibold">
-                      ₹{confirmedBooking.totalAmount.toLocaleString('en-IN')}
+                    <span className="text-[#946E3A] font-serif-luxury text-sm font-semibold">
+                      ₹{Math.max(0, confirmedBooking.totalAmount - (confirmedBooking.paidAmount || payableAmount)).toLocaleString('en-IN')}
                     </span>
                   </div>
                 </div>

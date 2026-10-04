@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield,
@@ -25,12 +26,21 @@ import {
   Trash2,
   MapPin,
   Check,
-  Compass
+  Compass,
+  Flame,
+  Palette,
+  Camera,
+  Image as ImageIcon,
+  QrCode as QrIcon,
+  Sliders,
+  ExternalLink
 } from 'lucide-react';
 import { useHotel } from '../context/HotelContext';
-import { Room, Booking, PromotionalOffer, Branch } from '../types';
+import { Room, Booking, PromotionalOffer, Branch, IndianFestivalTheme } from '../types';
 import { resolveHotelImage, ASSET_IMAGES } from '../utils/imageAssets';
 import { BranchPageModal } from './BranchPageModal';
+import { FESTIVAL_THEMES } from '../utils/festivalThemes';
+import { PHOTO_PRESETS } from '../utils/photoPresets';
 
 interface AdminPanelProps {
   onBackToHome: () => void;
@@ -60,7 +70,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
     resetAllData,
   } = useHotel();
 
-  const [activeTab, setActiveTab] = useState<'bookings' | 'rooms' | 'branches' | 'messages' | 'content'>('branches');
+  const [activeTab, setActiveTab] = useState<
+    'branches' | 'rooms' | 'photos' | 'festival_themes' | 'bookings' | 'messages' | 'content'
+  >('festival_themes');
   const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
   const [roomEditForm, setRoomEditForm] = useState<Room | null>(null);
 
@@ -71,6 +83,80 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
   // Content form
   const [contentForm, setContentForm] = useState(hotelContent);
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
+
+  // Photo Studio state
+  const [photoTarget, setPhotoTarget] = useState<'hero' | 'branch' | 'room' | 'dining' | 'spa'>('hero');
+  const [selectedBranchForPhoto, setSelectedBranchForPhoto] = useState<string>(() => branches[0]?.id || '');
+  const [selectedRoomForPhoto, setSelectedRoomForPhoto] = useState<string>(() => rooms[0]?.id || '');
+  const [customPhotoInput, setCustomPhotoInput] = useState<string>('');
+
+  // Live test QR generator state in Admin
+  const [testQrAmount, setTestQrAmount] = useState<number>(25000);
+  const [testQrDataUrl, setTestQrDataUrl] = useState<string>('');
+
+  useEffect(() => {
+    const upiUri = `upi://pay?pa=${hotelContent.upiVpa}&pn=${encodeURIComponent(
+      hotelContent.upiPayeeName
+    )}&am=${testQrAmount}&cu=INR&tn=${encodeURIComponent('Admin Test QR')}`;
+
+    QRCode.toDataURL(upiUri, {
+      width: 220,
+      margin: 2,
+      color: { dark: '#1C1917', light: '#FAF8F5' },
+    })
+      .then((url) => setTestQrDataUrl(url))
+      .catch((err) => console.error(err));
+  }, [testQrAmount, hotelContent.upiVpa, hotelContent.upiPayeeName]);
+
+  const handleSelectFestivalTheme = (themeId: IndianFestivalTheme) => {
+    const cfg = FESTIVAL_THEMES[themeId];
+    updateHotelContent({
+      activeFestivalTheme: themeId,
+      festivalGreetingTitle: cfg.defaultGreetingTitle,
+      festivalGreetingSubtitle: cfg.defaultGreetingSubtitle,
+      showFestivalBanner: themeId !== 'default',
+    });
+    setContentForm((prev) => ({
+      ...prev,
+      activeFestivalTheme: themeId,
+      festivalGreetingTitle: cfg.defaultGreetingTitle,
+      festivalGreetingSubtitle: cfg.defaultGreetingSubtitle,
+      showFestivalBanner: themeId !== 'default',
+    }));
+    triggerSaved(`Activated Indian Festival Theme: "${cfg.name}" (${cfg.hindiName}).`);
+  };
+
+  const handleApplyHeroPhoto = (url: string) => {
+    updateHotelContent({ heroImage: url });
+    setContentForm((prev) => ({ ...prev, heroImage: url }));
+    triggerSaved('Hero sanctuary background photo updated live.');
+  };
+
+  const handleApplyBranchPhoto = (branchId: string, url: string) => {
+    const target = branches.find((b) => b.id === branchId);
+    if (!target) return;
+    updateBranch({ ...target, image: url });
+    triggerSaved(`Updated photo for "${target.name}".`);
+  };
+
+  const handleApplyRoomPhoto = (roomId: string, url: string) => {
+    const target = rooms.find((r) => r.id === roomId);
+    if (!target) return;
+    updateRoom({ ...target, image: url });
+    triggerSaved(`Updated photo for suite "${target.name}".`);
+  };
+
+  const handleApplyDiningPhoto = (url: string) => {
+    updateHotelContent({ diningImage: url });
+    setContentForm((prev) => ({ ...prev, diningImage: url }));
+    triggerSaved('Dining & banquet experience photo updated.');
+  };
+
+  const handleApplySpaPhoto = (url: string) => {
+    updateHotelContent({ spaImage: url });
+    setContentForm((prev) => ({ ...prev, spaImage: url }));
+    triggerSaved('Ayurvedic Spa & Rasayana sanctuary photo updated.');
+  };
 
   // Filter bookings
   const [bookingFilter, setBookingFilter] = useState<'all' | 'pending_upi' | 'verified' | 'checked_in' | 'cancelled'>('all');
@@ -246,6 +332,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
           {/* Tab Navigation */}
           <div className="flex items-center gap-1.5 p-1 bg-white rounded-2xl border border-[#EAE4DA] shadow-sm overflow-x-auto no-scrollbar">
             <button
+              onClick={() => setActiveTab('festival_themes')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'festival_themes'
+                  ? 'bg-[#1C1917] text-white shadow-sm font-semibold'
+                  : 'text-[#57534E] hover:text-[#1C1917]'
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-500" />
+              <span>Festival Themes</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('photos')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'photos'
+                  ? 'bg-[#1C1917] text-white shadow-sm font-semibold'
+                  : 'text-[#57534E] hover:text-[#1C1917]'
+              }`}
+            >
+              <Camera className="w-3.5 h-3.5 text-[#946E3A]" />
+              <span>Photo Studio</span>
+            </button>
+            <button
               onClick={() => setActiveTab('branches')}
               className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'branches'
@@ -254,7 +362,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
               }`}
             >
               <Building className="w-3.5 h-3.5" />
-              <span>Sanctuaries &amp; Branches ({activeBranches.length})</span>
+              <span>Sanctuaries ({activeBranches.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('rooms')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'rooms'
+                  ? 'bg-[#1C1917] text-white shadow-sm font-semibold'
+                  : 'text-[#57534E] hover:text-[#1C1917]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Suites ({rooms.length})</span>
             </button>
             <button
               onClick={() => setActiveTab('bookings')}
@@ -268,17 +387,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
               <span>Reservations ({bookings.length})</span>
             </button>
             <button
-              onClick={() => setActiveTab('rooms')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'rooms'
-                  ? 'bg-[#1C1917] text-white shadow-sm font-semibold'
-                  : 'text-[#57534E] hover:text-[#1C1917]'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Suites &amp; Pricing ({rooms.length})</span>
-            </button>
-            <button
               onClick={() => setActiveTab('messages')}
               className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'messages'
@@ -287,7 +395,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
               }`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
-              <span>Guest Messaging</span>
+              <span>Guest Chat</span>
             </button>
             <button
               onClick={() => setActiveTab('content')}
@@ -297,8 +405,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
                   : 'text-[#57534E] hover:text-[#1C1917]'
               }`}
             >
-              <Tag className="w-3.5 h-3.5" />
-              <span>Content &amp; Promos</span>
+              <QrIcon className="w-3.5 h-3.5" />
+              <span>UPI &amp; Content</span>
             </button>
           </div>
         </div>
@@ -327,6 +435,700 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
 
         {/* Tab Contents with AnimatePresence */}
         <AnimatePresence mode="wait">
+          {/* TAB: Indian Festival Themes & Seasonal Aesthetics */}
+          {activeTab === 'festival_themes' && (
+            <motion.div
+              key="festival_themes"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-8"
+            >
+              {/* Header Card */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EAE4DA] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#946E3A] font-semibold mb-1">
+                    <Flame className="w-4 h-4 text-amber-600" />
+                    <span>Executive Theme Customizer · Indian Festivals</span>
+                  </div>
+                  <h2 className="font-serif-luxury text-2xl sm:text-3xl text-[#1C1917] font-light">
+                    Switch Resort Theme for Indian Festivals
+                  </h2>
+                  <p className="text-xs text-[#57534E] max-w-2xl mt-1 leading-relaxed">
+                    Transform the sanctuary website instantly for major Indian celebrations like Diwali, Holi, Navratri, Shravan Monsoon, or Royal Weddings. Changing themes updates the banner, greeting badges, celebratory color palette, and festive notices across the entire sanctuary in real-time.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="px-5 py-3 rounded-2xl bg-[#FAF5EC] border border-[#E8DCC8] text-right">
+                    <span className="text-[10px] uppercase tracking-wider text-[#78716C] block font-medium">
+                      Current Live Theme
+                    </span>
+                    <span className="font-serif-luxury text-lg font-bold text-[#946E3A]">
+                      {FESTIVAL_THEMES[hotelContent.activeFestivalTheme || 'default'].name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 6 Authentic Indian Festival Theme Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {(Object.values(FESTIVAL_THEMES) as Array<typeof FESTIVAL_THEMES[keyof typeof FESTIVAL_THEMES]>).map((theme) => {
+                  const isActive = (hotelContent.activeFestivalTheme || 'default') === theme.id;
+                  return (
+                    <div
+                      key={theme.id}
+                      className={`p-6 rounded-3xl border-2 transition-all flex flex-col justify-between ${
+                        isActive
+                          ? 'bg-white border-[#946E3A] shadow-xl ring-2 ring-[#946E3A]/20'
+                          : 'bg-white border-[#EAE4DA] hover:border-[#946E3A]/50 hover:shadow-md'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-3xl">{theme.emoji}</span>
+                          {isActive ? (
+                            <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] uppercase tracking-widest font-bold flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              <span>Active Theme</span>
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-0.5 rounded-full bg-[#FAF8F5] border text-[10px] text-[#78716C] font-mono">
+                              {theme.badge}
+                            </span>
+                          )}
+                        </div>
+
+                        <span className="text-[11px] font-serif-luxury text-[#946E3A] font-semibold block">
+                          {theme.hindiName}
+                        </span>
+                        <h3 className="font-serif-luxury text-xl text-[#1C1917] mb-2 leading-snug">
+                          {theme.name}
+                        </h3>
+                        <p className="text-xs text-[#57534E] leading-relaxed mb-4">
+                          {theme.tagline}
+                        </p>
+
+                        {/* Visual Banner Preview */}
+                        <div className={`p-3 rounded-xl bg-gradient-to-r ${theme.bannerGradient} text-white text-[11px] mb-4 truncate shadow-inner`}>
+                          <span className="opacity-75">Announcement: </span>
+                          <span className="font-medium">{theme.defaultBannerText}</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-[#F2ECE3]">
+                        <button
+                          type="button"
+                          onClick={() => handleSelectFestivalTheme(theme.id as IndianFestivalTheme)}
+                          disabled={isActive}
+                          className={`w-full py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                            isActive
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 cursor-default font-bold'
+                              : 'bg-[#1C1917] hover:bg-[#946E3A] text-white shadow-sm'
+                          }`}
+                        >
+                          {isActive ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Active Across Sanctuary</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-3.5 h-3.5 text-[#C5A869]" />
+                              <span>Activate {theme.name.split(' ')[0]} Theme</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Festival Banner & Greeting Customizer */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EAE4DA] shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EAE4DA] pb-4">
+                  <div>
+                    <h3 className="font-serif-luxury text-2xl text-[#1C1917]">
+                      Customize Festive Announcement &amp; Greeting
+                    </h3>
+                    <p className="text-xs text-[#57534E]">
+                      Edit the greeting message displayed in the hero section and celebratory top banner.
+                    </p>
+                  </div>
+
+                  {/* Toggle Banner Switch */}
+                  <label className="flex items-center gap-3 cursor-pointer p-2 rounded-xl bg-[#FAF8F5] border border-[#EAE4DA]">
+                    <span className="text-xs text-[#1C1917] font-semibold">Show Festive Top Banner:</span>
+                    <input
+                      type="checkbox"
+                      checked={contentForm.showFestivalBanner}
+                      onChange={(e) => {
+                        const val = e.target.checked;
+                        setContentForm((prev) => ({ ...prev, showFestivalBanner: val }));
+                        updateHotelContent({ showFestivalBanner: val });
+                        triggerSaved(val ? 'Festive top banner enabled.' : 'Festive top banner hidden.');
+                      }}
+                      className="w-5 h-5 accent-[#946E3A] rounded cursor-pointer"
+                    />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1.5">
+                      Festive Greeting Title (Displayed in Hero &amp; Banner)
+                    </label>
+                    <input
+                      type="text"
+                      value={contentForm.festivalGreetingTitle || ''}
+                      onChange={(e) => setContentForm({ ...contentForm, festivalGreetingTitle: e.target.value })}
+                      placeholder="e.g. Shubh Deepavali & Festive Celebrations"
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] focus:border-[#946E3A] focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1.5">
+                      Festive Subtitle / Tagline
+                    </label>
+                    <input
+                      type="text"
+                      value={contentForm.festivalGreetingSubtitle || ''}
+                      onChange={(e) => setContentForm({ ...contentForm, festivalGreetingSubtitle: e.target.value })}
+                      placeholder="e.g. 10,000 hand-poured brass diyas & celebratory royal feasts"
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] focus:border-[#946E3A] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-3 border-t border-[#EAE4DA]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateHotelContent({
+                        festivalGreetingTitle: contentForm.festivalGreetingTitle,
+                        festivalGreetingSubtitle: contentForm.festivalGreetingSubtitle,
+                      });
+                      triggerSaved('Festive greetings updated in real-time.');
+                    }}
+                    className="px-6 py-2.5 rounded-full bg-[#1C1917] hover:bg-[#946E3A] text-white text-xs font-semibold cursor-pointer shadow-md transition-colors"
+                  >
+                    Save Festive Greetings
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* TAB: Photos & Media Studio (Change Any Photo Across Website) */}
+          {activeTab === 'photos' && (
+            <motion.div
+              key="photos"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-8"
+            >
+              {/* Header */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EAE4DA] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#946E3A] font-semibold mb-1">
+                    <Camera className="w-4 h-4 text-[#946E3A]" />
+                    <span>Resort Photography &amp; Visual Studio</span>
+                  </div>
+                  <h2 className="font-serif-luxury text-2xl sm:text-3xl text-[#1C1917] font-light">
+                    Change Photos Across the Entire Website
+                  </h2>
+                  <p className="text-xs text-[#57534E] max-w-2xl mt-1 leading-relaxed">
+                    Update the hero background banner, sanctuary cover photos, suite &amp; villa photography, or dining and spa imagery. Paste your own image URLs or pick from curated architectural presets with instant live preview.
+                  </p>
+                </div>
+
+                {/* Target Navigation */}
+                <div className="flex items-center gap-1.5 p-1 bg-[#FAF8F5] rounded-2xl border border-[#EAE4DA] shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => { setPhotoTarget('hero'); setCustomPhotoInput(''); }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-colors ${
+                      photoTarget === 'hero' ? 'bg-[#1C1917] text-white font-semibold' : 'text-[#57534E] hover:text-[#1C1917]'
+                    }`}
+                  >
+                    Hero Banner
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPhotoTarget('branch'); setCustomPhotoInput(''); }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-colors ${
+                      photoTarget === 'branch' ? 'bg-[#1C1917] text-white font-semibold' : 'text-[#57534E] hover:text-[#1C1917]'
+                    }`}
+                  >
+                    Sanctuaries
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPhotoTarget('room'); setCustomPhotoInput(''); }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-colors ${
+                      photoTarget === 'room' ? 'bg-[#1C1917] text-white font-semibold' : 'text-[#57534E] hover:text-[#1C1917]'
+                    }`}
+                  >
+                    Suites &amp; Villas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setPhotoTarget('dining'); setCustomPhotoInput(''); }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-colors ${
+                      photoTarget === 'dining' ? 'bg-[#1C1917] text-white font-semibold' : 'text-[#57534E] hover:text-[#1C1917]'
+                    }`}
+                  >
+                    Dining &amp; Spa
+                  </button>
+                </div>
+              </div>
+
+              {/* SECTION 1: HERO BANNER PHOTO */}
+              {photoTarget === 'hero' && (
+                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EAE4DA] shadow-sm space-y-6">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest text-[#946E3A] font-bold block mb-1">
+                      Target: Public Landing Page
+                    </span>
+                    <h3 className="font-serif-luxury text-2xl text-[#1C1917]">
+                      Hero Sanctuary Background Photo
+                    </h3>
+                    <p className="text-xs text-[#57534E]">
+                      This is the main cinematic photograph guests see when they enter Hotel Manchester.
+                    </p>
+                  </div>
+
+                  {/* Current Image Preview & URL Input */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1.5">
+                          Custom Image URL
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="url"
+                            value={customPhotoInput}
+                            onChange={(e) => setCustomPhotoInput(e.target.value)}
+                            placeholder="https://images.unsplash.com/..."
+                            className="flex-1 px-4 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] focus:border-[#946E3A] focus:outline-none font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (customPhotoInput.trim()) {
+                                handleApplyHeroPhoto(customPhotoInput.trim());
+                                setCustomPhotoInput('');
+                              }
+                            }}
+                            disabled={!customPhotoInput.trim()}
+                            className={`px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                              customPhotoInput.trim()
+                                ? 'bg-[#1C1917] hover:bg-[#946E3A] text-white shadow-sm'
+                                : 'bg-[#EAE4DA] text-[#A8A29E] cursor-not-allowed'
+                            }`}
+                          >
+                            Apply URL
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-[#78716C] leading-relaxed">
+                        Currently using: <span className="font-mono text-[#1C1917] truncate block">{hotelContent.heroImage || ASSET_IMAGES.hero}</span>
+                      </div>
+                    </div>
+
+                    {/* Live Preview */}
+                    <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-[#EAE4DA] border border-[#D8D0C5] shadow-md">
+                      <img
+                        src={resolveHotelImage(hotelContent.heroImage || ASSET_IMAGES.hero)}
+                        alt="Current Hero Background"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold">
+                        Live Hero Preview
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Curated Luxury Architectural Presets */}
+                  <div className="pt-4 border-t border-[#F2ECE3]">
+                    <h4 className="text-xs uppercase tracking-wider text-[#78716C] font-semibold mb-3">
+                      Or Choose from Curated Luxury Architectural Presets:
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {PHOTO_PRESETS.filter((p) => p.category === 'hero').map((preset) => (
+                        <div
+                          key={preset.id}
+                          className="p-3 rounded-2xl border border-[#EAE4DA] hover:border-[#946E3A] bg-[#FAF8F5] transition-all flex flex-col justify-between group"
+                        >
+                          <div>
+                            <div className="relative aspect-[16/9] rounded-xl overflow-hidden mb-2 bg-[#EAE4DA]">
+                              <img
+                                src={preset.url}
+                                alt={preset.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                            <span className="font-serif-luxury text-sm text-[#1C1917] font-medium block">
+                              {preset.title}
+                            </span>
+                            <span className="text-[11px] text-[#78716C] block leading-tight mt-0.5">
+                              {preset.description}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleApplyHeroPhoto(preset.url)}
+                            className="mt-3 w-full py-1.5 rounded-lg bg-white border border-[#D8D0C5] hover:border-[#946E3A] hover:bg-[#FAF5EC] text-xs font-semibold text-[#1C1917] transition-colors cursor-pointer"
+                          >
+                            Set as Hero Photo
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 2: SANCTUARY BRANCH PHOTOS */}
+              {photoTarget === 'branch' && (
+                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EAE4DA] shadow-sm space-y-6">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest text-[#946E3A] font-bold block mb-1">
+                      Target: Sanctuary Branch Pages
+                    </span>
+                    <h3 className="font-serif-luxury text-2xl text-[#1C1917]">
+                      Update Sanctuary Cover Photo
+                    </h3>
+                    <p className="text-xs text-[#57534E]">
+                      Select any branch to update its cover image across the sanctuaries grid and dedicated page.
+                    </p>
+                  </div>
+
+                  {/* Branch Selector Dropdown */}
+                  <div className="max-w-md">
+                    <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1.5">
+                      Select Sanctuary Branch to Edit
+                    </label>
+                    <select
+                      value={selectedBranchForPhoto}
+                      onChange={(e) => setSelectedBranchForPhoto(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] font-semibold focus:border-[#946E3A] focus:outline-none"
+                    >
+                      {branches.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name} ({b.city}, {b.state})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {(() => {
+                    const currentBranch = branches.find((b) => b.id === selectedBranchForPhoto) || branches[0];
+                    if (!currentBranch) return null;
+                    return (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1.5">
+                              Custom Image URL for {currentBranch.name}
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="url"
+                                value={customPhotoInput}
+                                onChange={(e) => setCustomPhotoInput(e.target.value)}
+                                placeholder="https://..."
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] focus:border-[#946E3A] focus:outline-none font-mono"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (customPhotoInput.trim()) {
+                                    handleApplyBranchPhoto(currentBranch.id, customPhotoInput.trim());
+                                    setCustomPhotoInput('');
+                                  }
+                                }}
+                                disabled={!customPhotoInput.trim()}
+                                className={`px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                                  customPhotoInput.trim()
+                                    ? 'bg-[#1C1917] hover:bg-[#946E3A] text-white shadow-sm'
+                                    : 'bg-[#EAE4DA] text-[#A8A29E] cursor-not-allowed'
+                                }`}
+                              >
+                                Save Photo
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="pt-2">
+                            <span className="text-xs uppercase tracking-wider text-[#78716C] font-semibold block mb-2">
+                              Presets for Sanctuaries:
+                            </span>
+                            <div className="grid grid-cols-2 gap-2">
+                              {PHOTO_PRESETS.slice(0, 4).map((p) => (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => handleApplyBranchPhoto(currentBranch.id, p.url)}
+                                  className="p-2 rounded-xl border border-[#EAE4DA] hover:border-[#946E3A] bg-[#FAF8F5] text-left text-xs transition-colors cursor-pointer group"
+                                >
+                                  <span className="font-medium text-[#1C1917] block truncate">{p.title}</span>
+                                  <span className="text-[10px] text-[#946E3A]">Apply Preset</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Live Branch Preview */}
+                        <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-[#EAE4DA] border border-[#D8D0C5] shadow-md">
+                          <img
+                            src={resolveHotelImage(currentBranch.image)}
+                            alt={currentBranch.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold">
+                            {currentBranch.name} ({currentBranch.city})
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* SECTION 3: SUITES & ROOM PHOTOS */}
+              {photoTarget === 'room' && (
+                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#EAE4DA] shadow-sm space-y-6">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest text-[#946E3A] font-bold block mb-1">
+                      Target: Suite &amp; Villa Catalog
+                    </span>
+                    <h3 className="font-serif-luxury text-2xl text-[#1C1917]">
+                      Update Room / Suite Photography
+                    </h3>
+                    <p className="text-xs text-[#57534E]">
+                      Select any suite to update its showcase photograph across search results and reservation modals.
+                    </p>
+                  </div>
+
+                  {/* Room Selector Dropdown */}
+                  <div className="max-w-md">
+                    <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1.5">
+                      Select Suite / Villa to Edit
+                    </label>
+                    <select
+                      value={selectedRoomForPhoto}
+                      onChange={(e) => setSelectedRoomForPhoto(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] font-semibold focus:border-[#946E3A] focus:outline-none"
+                    >
+                      {rooms.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.name} · ₹{r.pricePerNight.toLocaleString('en-IN')}/night
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {(() => {
+                    const currentRoom = rooms.find((r) => r.id === selectedRoomForPhoto) || rooms[0];
+                    if (!currentRoom) return null;
+                    return (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1.5">
+                              Custom Image URL for {currentRoom.name}
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="url"
+                                value={customPhotoInput}
+                                onChange={(e) => setCustomPhotoInput(e.target.value)}
+                                placeholder="https://..."
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] focus:border-[#946E3A] focus:outline-none font-mono"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (customPhotoInput.trim()) {
+                                    handleApplyRoomPhoto(currentRoom.id, customPhotoInput.trim());
+                                    setCustomPhotoInput('');
+                                  }
+                                }}
+                                disabled={!customPhotoInput.trim()}
+                                className={`px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                                  customPhotoInput.trim()
+                                    ? 'bg-[#1C1917] hover:bg-[#946E3A] text-white shadow-sm'
+                                    : 'bg-[#EAE4DA] text-[#A8A29E] cursor-not-allowed'
+                                }`}
+                              >
+                                Save Photo
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="pt-2">
+                            <span className="text-xs uppercase tracking-wider text-[#78716C] font-semibold block mb-2">
+                              Suite &amp; Villa Presets:
+                            </span>
+                            <div className="grid grid-cols-2 gap-2">
+                              {PHOTO_PRESETS.filter((p) => p.category === 'room').map((p) => (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => handleApplyRoomPhoto(currentRoom.id, p.url)}
+                                  className="p-2 rounded-xl border border-[#EAE4DA] hover:border-[#946E3A] bg-[#FAF8F5] text-left text-xs transition-colors cursor-pointer"
+                                >
+                                  <span className="font-medium text-[#1C1917] block truncate">{p.title}</span>
+                                  <span className="text-[10px] text-[#946E3A]">Apply Preset</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Live Room Preview */}
+                        <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-[#EAE4DA] border border-[#D8D0C5] shadow-md">
+                          <img
+                            src={resolveHotelImage(currentRoom.image)}
+                            alt={currentRoom.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold">
+                            {currentRoom.name}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* SECTION 4: DINING & SPA PHOTOS */}
+              {photoTarget === 'dining' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Dining Photo Card */}
+                  <div className="p-6 rounded-3xl bg-white border border-[#EAE4DA] shadow-sm space-y-4">
+                    <span className="text-[10px] uppercase tracking-widest text-[#946E3A] font-bold block">
+                      Gastronomy &amp; Dining Cover
+                    </span>
+                    <h3 className="font-serif-luxury text-xl text-[#1C1917]">
+                      Courtyard Banquets &amp; Cellar
+                    </h3>
+
+                    <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-[#EAE4DA]">
+                      <img
+                        src={resolveHotelImage(hotelContent.diningImage || ASSET_IMAGES.palace)}
+                        alt="Dining Experience"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        placeholder="Paste dining image URL..."
+                        value={customPhotoInput}
+                        onChange={(e) => setCustomPhotoInput(e.target.value)}
+                        className="flex-1 px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] font-mono focus:border-[#946E3A] focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (customPhotoInput.trim()) {
+                            handleApplyDiningPhoto(customPhotoInput.trim());
+                            setCustomPhotoInput('');
+                          }
+                        }}
+                        disabled={!customPhotoInput.trim()}
+                        className="px-4 py-2 rounded-xl bg-[#1C1917] hover:bg-[#946E3A] text-white text-xs font-semibold cursor-pointer disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                    </div>
+
+                    <div className="flex gap-2 pt-1">
+                      {PHOTO_PRESETS.filter((p) => p.category === 'dining').map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => handleApplyDiningPhoto(p.url)}
+                          className="flex-1 p-2 rounded-lg bg-[#FAF8F5] border border-[#EAE4DA] hover:border-[#946E3A] text-left text-[11px] truncate cursor-pointer"
+                        >
+                          <span className="block truncate font-medium text-[#1C1917]">{p.title}</span>
+                          <span className="text-[9px] text-[#946E3A]">Apply Preset</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Spa Photo Card */}
+                  <div className="p-6 rounded-3xl bg-white border border-[#EAE4DA] shadow-sm space-y-4">
+                    <span className="text-[10px] uppercase tracking-widest text-[#946E3A] font-bold block">
+                      Wellness &amp; Spa Cover
+                    </span>
+                    <h3 className="font-serif-luxury text-xl text-[#1C1917]">
+                      Ayurvedic Rasayana Sanctuary
+                    </h3>
+
+                    <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-[#EAE4DA]">
+                      <img
+                        src={resolveHotelImage(hotelContent.spaImage || ASSET_IMAGES.nature)}
+                        alt="Spa Experience"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        placeholder="Paste spa image URL..."
+                        value={customPhotoInput}
+                        onChange={(e) => setCustomPhotoInput(e.target.value)}
+                        className="flex-1 px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] font-mono focus:border-[#946E3A] focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (customPhotoInput.trim()) {
+                            handleApplySpaPhoto(customPhotoInput.trim());
+                            setCustomPhotoInput('');
+                          }
+                        }}
+                        disabled={!customPhotoInput.trim()}
+                        className="px-4 py-2 rounded-xl bg-[#1C1917] hover:bg-[#946E3A] text-white text-xs font-semibold cursor-pointer disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                    </div>
+
+                    <div className="flex gap-2 pt-1">
+                      {PHOTO_PRESETS.filter((p) => p.category === 'spa').map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => handleApplySpaPhoto(p.url)}
+                          className="flex-1 p-2 rounded-lg bg-[#FAF8F5] border border-[#EAE4DA] hover:border-[#946E3A] text-left text-[11px] truncate cursor-pointer"
+                        >
+                          <span className="block truncate font-medium text-[#1C1917]">{p.title}</span>
+                          <span className="text-[9px] text-[#946E3A]">Apply Preset</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* TAB 1: Sanctuaries & Branches Management (ADD, REMOVE & RESTORE) */}
           {activeTab === 'branches' && (
             <motion.div
@@ -650,13 +1452,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
 
                         {/* Actions */}
                         <div className="pt-4 flex items-center justify-between gap-2 border-t border-[#F2ECE3]">
-                          <button
-                            onClick={() => setAdminPreviewBranch(branch)}
-                            className="inline-flex items-center gap-1.5 text-xs text-[#946E3A] hover:text-[#6B4C20] font-semibold cursor-pointer py-1"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Preview Page</span>
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => setAdminPreviewBranch(branch)}
+                              className="inline-flex items-center gap-1.5 text-xs text-[#946E3A] hover:text-[#6B4C20] font-semibold cursor-pointer py-1"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>Preview</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setSelectedBranchForPhoto(branch.id);
+                                setPhotoTarget('branch');
+                                setActiveTab('photos');
+                              }}
+                              className="inline-flex items-center gap-1.5 text-xs text-[#57534E] hover:text-[#946E3A] font-semibold cursor-pointer py-1"
+                            >
+                              <Camera className="w-3.5 h-3.5" />
+                              <span>Change Photo</span>
+                            </button>
+                          </div>
 
                           <button
                             onClick={() => setBranchToRemove(branch)}
@@ -970,6 +1786,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
                             />
                           </div>
 
+                          <div>
+                            <label className="text-[11px] uppercase tracking-wider text-[#78716C] block mb-1 font-semibold">
+                              Suite Showcase Photo URL
+                            </label>
+                            <input
+                              type="url"
+                              value={roomEditForm.image}
+                              onChange={(e) =>
+                                setRoomEditForm({ ...roomEditForm, image: e.target.value })
+                              }
+                              placeholder="https://..."
+                              className="w-full px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] font-mono"
+                            />
+                          </div>
+
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <label className="text-[11px] uppercase tracking-wider text-[#946E3A] block mb-1 font-semibold">
@@ -1083,7 +1914,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
                             </div>
                           </div>
 
-                          <div className="pt-4 flex items-center justify-end">
+                          <div className="pt-4 flex items-center justify-between">
+                            <button
+                              onClick={() => {
+                                setSelectedRoomForPhoto(room.id);
+                                setPhotoTarget('room');
+                                setActiveTab('photos');
+                              }}
+                              className="inline-flex items-center gap-1.5 text-xs text-[#57534E] hover:text-[#946E3A] font-semibold cursor-pointer py-1"
+                            >
+                              <Camera className="w-3.5 h-3.5 text-[#946E3A]" />
+                              <span>Change Photo</span>
+                            </button>
+
                             <button
                               onClick={() => handleStartEditRoom(room)}
                               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#D8D0C5] hover:border-[#946E3A] hover:bg-[#FAF8F5] text-xs font-medium text-[#1C1917] transition-all cursor-pointer"
@@ -1329,6 +2172,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1">
+                      Default Advance Token Deposit % *
+                    </label>
+                    <select
+                      value={contentForm.defaultAdvanceDepositPercent || 25}
+                      onChange={(e) => setContentForm({ ...contentForm, defaultAdvanceDepositPercent: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917] font-semibold"
+                    >
+                      <option value={25}>25% Advance Token Guarantee (Standard)</option>
+                      <option value={50}>50% Half Deposit</option>
+                      <option value={100}>100% Full Pre-Payment Only</option>
+                    </select>
+                  </div>
+
                   <div className="sm:col-span-2">
                     <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1">
                       Hero Subtitle
@@ -1339,6 +2197,61 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToHome }) => {
                       onChange={(e) => setContentForm({ ...contentForm, heroSubtitle: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#D8D0C5] text-xs text-[#1C1917]"
                     />
+                  </div>
+                </div>
+
+                {/* Live Amount QR Generator Testing Station */}
+                <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DA] space-y-4">
+                  <div className="flex items-center gap-2">
+                    <QrIcon className="w-4 h-4 text-[#946E3A]" />
+                    <span className="font-serif-luxury text-base text-[#1C1917] font-medium">
+                      Admin Test: Live Amount QR Code Generator
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#57534E]">
+                    Verify that your UPI VPA ({contentForm.upiVpa}) encodes amounts and generates clean scannable QR codes for guests.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
+                    <div className="p-3 bg-white rounded-2xl border border-[#D8D0C5] shadow-sm">
+                      {testQrDataUrl ? (
+                        <img src={testQrDataUrl} alt="Test QR" className="w-40 h-40 object-contain" />
+                      ) : (
+                        <div className="w-40 h-40 flex items-center justify-center bg-gray-100 rounded-lg">
+                          <QrIcon className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-3 flex-1 text-xs">
+                      <div>
+                        <label className="block text-[11px] uppercase tracking-wider text-[#78716C] font-semibold mb-1">
+                          Test QR Amount (₹)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="100"
+                            step="500"
+                            value={testQrAmount}
+                            onChange={(e) => setTestQrAmount(Number(e.target.value))}
+                            className="w-40 px-3 py-2 rounded-xl bg-white border border-[#D8D0C5] text-xs font-mono font-bold text-[#1C1917]"
+                          />
+                          <span className="font-serif-luxury text-xl font-bold text-[#946E3A]">
+                            ₹{testQrAmount.toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-white border border-[#EAE4DA] font-mono text-[10px] text-[#78716C] truncate">
+                        upi://pay?pa={contentForm.upiVpa}&amp;pn={encodeURIComponent(contentForm.upiPayeeName)}&amp;am={testQrAmount}&amp;cu=INR
+                      </div>
+
+                      <div className="flex items-center gap-2 text-[11px] text-emerald-700 font-semibold">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Ready for guest scanning via PhonePe, GPay, Paytm &amp; BHIM</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

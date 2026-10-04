@@ -14,6 +14,7 @@ import { CustomerDashboard } from './components/CustomerDashboard';
 import { AdminPanel } from './components/AdminPanel';
 import { BottomPromoBanner } from './components/BottomPromoBanner';
 import { WhatsAppConcierge } from './components/WhatsAppConcierge';
+import { FestivalBanner } from './components/FestivalBanner';
 import { Footer } from './components/Footer';
 import { Room, Booking, Branch } from './types';
 
@@ -66,6 +67,9 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#292524] flex flex-col justify-between selection:bg-[#946E3A]/25 selection:text-[#1C1917]">
+      {/* Top Celebratory Indian Festival Banner */}
+      <FestivalBanner onExploreFestiveSuites={() => handleNavigateToSection('suites')} />
+
       {/* Top Bar Navigation */}
       <Navbar
         onOpenDashboard={() => setActiveView('dashboard')}

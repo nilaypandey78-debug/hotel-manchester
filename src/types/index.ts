@@ -36,6 +36,14 @@ export interface Branch {
   createdAt?: string;
 }
 
+export type IndianFestivalTheme = 
+  | 'default' 
+  | 'diwali' 
+  | 'holi' 
+  | 'navratri' 
+  | 'monsoon' 
+  | 'royal_wedding';
+
 export interface BookingGuestDetails {
   fullName: string;
   email: string;
@@ -62,6 +70,8 @@ export interface Booking {
   };
   guestDetails: BookingGuestDetails;
   totalAmount: number;
+  paidAmount?: number;
+  paymentType?: 'full' | 'advance_deposit';
   paymentStatus: 'pending_upi' | 'verified' | 'checked_in' | 'completed' | 'cancelled';
   createdAt: string;
   addOns: string[];
@@ -98,6 +108,14 @@ export interface HotelContent {
   upiVpa: string;
   upiPayeeName: string;
   heroSubtitle: string;
+  heroImage?: string;
+  diningImage?: string;
+  spaImage?: string;
+  activeFestivalTheme: IndianFestivalTheme;
+  festivalGreetingTitle?: string;
+  festivalGreetingSubtitle?: string;
+  showFestivalBanner: boolean;
+  defaultAdvanceDepositPercent?: number;
   socialLinks: {
     instagram: string;
     youtube: string;

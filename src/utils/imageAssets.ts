@@ -8,8 +8,10 @@ import branchPalaceRetreat from '../assets/images/branch_palace_retreat_17908621
 export const ASSET_IMAGES = {
   hero: heroLuxuryResort,
   presidential: roomPresidentialSuite,
+  room: roomPresidentialSuite,
   villa: roomHeritageVilla,
   palace: branchPalaceRetreat,
+  nature: heroLuxuryResort,
 } as const;
 
 /**

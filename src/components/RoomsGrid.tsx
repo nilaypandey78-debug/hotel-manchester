@@ -195,8 +195,10 @@ export const RoomsGrid: React.FC<RoomsGridProps> = ({ onSelectRoom }) => {
                     {/* Pricing & Reservation Action */}
                     <div className="pt-6 border-t border-[#F2ECE3] flex items-center justify-between gap-4">
                       <div>
-                        <div className="text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
-                          Nightly Tariff
+                        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-[#78716C] font-semibold">
+                          <span>Nightly Tariff</span>
+                          <span className="text-[#C4B9AA]">·</span>
+                          <span className="text-emerald-700 font-medium">Amount QR</span>
                         </div>
                         <div className="flex items-baseline gap-1 text-[#1C1917]">
                           <span className="font-serif-luxury text-2xl sm:text-3xl font-normal text-[#946E3A] tabular-nums">
@@ -217,7 +219,7 @@ export const RoomsGrid: React.FC<RoomsGridProps> = ({ onSelectRoom }) => {
                             : 'bg-[#EAE4DA] text-[#A8A29E] cursor-not-allowed border border-[#DFD7CB]'
                         }`}
                       >
-                        <span>{room.available ? 'Reserve Suite' : 'Unavailable'}</span>
+                        <span>{room.available ? 'Book & Pay QR' : 'Unavailable'}</span>
                         {room.available && <ArrowRight className="w-3.5 h-3.5" />}
                       </motion.button>
                     </div>

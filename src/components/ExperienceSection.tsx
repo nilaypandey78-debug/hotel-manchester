@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ASSET_IMAGES } from '../utils/imageAssets';
+import { ASSET_IMAGES, resolveHotelImage } from '../utils/imageAssets';
+import { useHotel } from '../context/HotelContext';
 
 export const ExperienceSection: React.FC = () => {
+  const { hotelContent } = useHotel();
   return (
     <section id="experiences" className="py-24 bg-[#F5F1EB] border-t border-[#EAE4DA] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,7 +51,7 @@ export const ExperienceSection: React.FC = () => {
 
             <div className="relative aspect-[21/9] overflow-hidden bg-[#EAE4DA] mx-8 mb-8 rounded-2xl">
               <img
-                src={ASSET_IMAGES.palace}
+                src={resolveHotelImage(hotelContent.diningImage || ASSET_IMAGES.palace)}
                 alt="Manchester Palace Sanctuary Dining"
                 className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
               />
@@ -73,12 +75,21 @@ export const ExperienceSection: React.FC = () => {
               <h3 className="font-serif-luxury text-2xl sm:text-3xl font-light text-[#1C1917] mb-4">
                 Ancient Ayurvedic Rasayana Therapy
               </h3>
-              <p className="text-sm text-[#57534E] font-light leading-relaxed mb-6">
+              <p className="text-sm text-[#57534E] font-light leading-relaxed mb-4">
                 Restorative herbal oil infusions, copper soaking bathtubs, and deep tissue marma massages administered by lineage practitioners.
               </p>
             </div>
 
-            <div className="pt-6 border-t border-[#F2ECE3] space-y-3 text-xs text-[#44403C]">
+            <div className="relative aspect-[16/9] overflow-hidden bg-[#EAE4DA] my-4 rounded-2xl">
+              <img
+                src={resolveHotelImage(hotelContent.spaImage || ASSET_IMAGES.nature)}
+                alt="Ayurvedic Rasayana Spa Experience"
+                className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+            </div>
+
+            <div className="pt-4 border-t border-[#F2ECE3] space-y-2 text-xs text-[#44403C]">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#946E3A]" />
                 <span>Cold-pressed sesame &amp; brahmi oils</span>

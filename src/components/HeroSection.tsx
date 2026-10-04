@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Calendar, Users, MapPin, ArrowDown, Sparkles } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useHotel } from '../context/HotelContext';
-import { ASSET_IMAGES } from '../utils/imageAssets';
+import { ASSET_IMAGES, resolveHotelImage } from '../utils/imageAssets';
+import { FESTIVAL_THEMES } from '../utils/festivalThemes';
 
 interface HeroSectionProps {
   onSearch: (branchId: string, dates: { checkIn: string; checkOut: string }, guests: number) => void;
@@ -11,6 +12,7 @@ interface HeroSectionProps {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, onExploreClick }) => {
   const { activeBranches, selectedBranchId, setSelectedBranchId, hotelContent } = useHotel();
+  const activeThemeConfig = FESTIVAL_THEMES[hotelContent.activeFestivalTheme || 'default'];
 
   // Scroll parallax for cinematic background glide and content reveal
   const { scrollY } = useScroll();
@@ -58,7 +60,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, onExploreCli
           initial={{ scale: 1.1, opacity: 0.85 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
-          src={ASSET_IMAGES.hero}
+          src={resolveHotelImage(hotelContent.heroImage || ASSET_IMAGES.hero)}
           alt="Hotel Manchester Luxury Sanctuary"
           referrerPolicy="no-referrer"
           className="w-full h-full object-cover object-center"
@@ -91,6 +93,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onSearch, onExploreCli
           }}
           className="absolute -top-12 left-10 w-96 h-96 rounded-full bg-[radial-gradient(circle,rgba(197,168,128,0.3)_0%,transparent_70%)] pointer-events-none blur-2xl"
         />
+
+        {/* Indian Festival Greeting Badge (When an Indian festival theme is activated by Admin) */}
+        {activeThemeConfig && hotelContent.activeFestivalTheme && hotelContent.activeFestivalTheme !== 'default' && (
+          <motion.div
+            variants={itemVariants}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-amber-300 shadow-[0_4px_16px_rgba(217,119,6,0.15)] text-xs font-semibold text-[#1C1917] mb-4"
+          >
+            <span className="text-base">{activeThemeConfig.emoji}</span>
+            <span className="text-[#946E3A] font-serif-luxury font-medium text-sm">
+              {activeThemeConfig.hindiName}
+            </span>
+            <span className="text-[#C4B9AA]">·</span>
+            <span className="text-[11px] uppercase tracking-wider text-[#57534E]">
+              {hotelContent.festivalGreetingTitle || activeThemeConfig.defaultGreetingTitle}
+            </span>
+          </motion.div>
+        )}
 
         {/* Clean unboxed metadata with subtle typographic separators */}
         <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2.5 text-xs text-[#946E3A] tracking-[0.25em] uppercase font-semibold mb-5">

@@ -90,7 +90,10 @@ export const HotelProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (!parsed.whatsappNumber || parsed.whatsappNumber === '+919876543210') {
         parsed.whatsappNumber = '+91 91712 90395';
       }
-      return parsed;
+      return {
+        ...INITIAL_HOTEL_CONTENT,
+        ...parsed,
+      };
     } catch {
       return INITIAL_HOTEL_CONTENT;
     }
